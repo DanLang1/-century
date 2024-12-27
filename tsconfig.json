@@ -16,6 +16,7 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
+      "@/components/*": ["components/*"],
       "@/*": ["./*"]
     },
     "plugins": [{ "name": "next" }]

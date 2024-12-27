@@ -1,11 +1,5 @@
-import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
-import { Welcome } from '../components/Welcome/Welcome';
+import { AppShellLayout } from '@/components/AppShellLayout/AppShellLayout';
 
 export default function HomePage() {
-  return (
-    <>
-      <Welcome />
-      <ColorSchemeToggle />
-    </>
-  );
+  return <AppShellLayout showWelcome />;
 }
