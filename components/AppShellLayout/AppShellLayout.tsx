@@ -41,9 +41,8 @@ export function AppShellLayout({ children, showWelcome }: AppShellLayoutProps) {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          {children}
-
           {showWelcome && <Welcome />}
+          {children}
         </AppShell.Main>
       </AppShell>
     </>
