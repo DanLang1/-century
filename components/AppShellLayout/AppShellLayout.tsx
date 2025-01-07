@@ -1,7 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { AppShell, Box, Burger } from '@mantine/core';
+import {
+  IconNumber100Small,
+  IconSquareRoundedNumber0,
+  IconSquareRoundedNumber1,
+} from '@tabler/icons-react';
+import { AppShell, Box, Burger, Group, Skeleton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle } from '@/components/ColorSchemeToggle/ColorSchemeToggle';
 import { Welcome } from '@/components/Welcome/Welcome';
@@ -17,32 +22,27 @@ export function AppShellLayout({ children, showWelcome }: AppShellLayoutProps) {
     <>
       <AppShell
         header={{ height: 60 }}
-        navbar={{
-          width: 150,
-          breakpoint: 'sm',
-          collapsed: { mobile: !opened },
-        }}
+        navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
         padding="md"
       >
         <AppShell.Header>
-          <Box pl="md" pt="md">
-            A century ago where pr2 was found
-          </Box>
-
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          {/* <ColorSchemeToggle />  */}
+          <Group h="100%" px="md">
+            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+            <IconNumber100Small size={48} />
+            <ColorSchemeToggle />
+          </Group>
         </AppShell.Header>
-
         <AppShell.Navbar p="md">
           <Link href="/"> Home</Link>
           <Link href="/rotmg">ROTMG </Link>
           <Link href="/pr2">PR2</Link>
           <Link href="/mt">Minethings</Link>
         </AppShell.Navbar>
-
         <AppShell.Main>
-          {showWelcome && <Welcome />}
-          {children}
+          <Box>
+            {showWelcome && <Welcome />}
+            {children}
+          </Box>
         </AppShell.Main>
       </AppShell>
     </>
