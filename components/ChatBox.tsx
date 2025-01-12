@@ -71,7 +71,7 @@ export function ChatBox() {
   return (
     <>
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
-        <Container {...demoProps} size="lg">
+        <Container {...demoProps} size="md">
           <ScrollArea h="400" type="always" viewportRef={viewport}>
             {messages.map((message, index) => (
               <ul key={index}>{message}</ul>

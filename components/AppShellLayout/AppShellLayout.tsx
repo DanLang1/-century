@@ -39,10 +39,10 @@ export function AppShellLayout({ children, showWelcome }: AppShellLayoutProps) {
           <Link href="/mt">Minethings</Link>
         </AppShell.Navbar>
         <AppShell.Main>
-          <Box>
-            {showWelcome && <Welcome />}
-            {children}
-          </Box>
+          {/* <Box> */}
+          {showWelcome && <Welcome />}
+          {children}
+          {/* </Box> */}
         </AppShell.Main>
       </AppShell>
     </>
