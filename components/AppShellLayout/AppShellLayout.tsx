@@ -1,22 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  IconNumber100Small,
-  IconSquareRoundedNumber0,
-  IconSquareRoundedNumber1,
-} from '@tabler/icons-react';
+import { IconNumber100Small } from '@tabler/icons-react';
 import { AppShell, Box, Burger, Group, Skeleton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle } from '@/components/ColorSchemeToggle/ColorSchemeToggle';
-import { Welcome } from '@/components/Welcome/Welcome';
 
 interface AppShellLayoutProps {
   children?: React.ReactNode;
-  showWelcome?: boolean;
 }
 
-export function AppShellLayout({ children, showWelcome }: AppShellLayoutProps) {
+export function AppShellLayout({ children }: AppShellLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
   return (
     <>
@@ -39,10 +33,7 @@ export function AppShellLayout({ children, showWelcome }: AppShellLayoutProps) {
           <Link href="/mt">Minethings</Link>
         </AppShell.Navbar>
         <AppShell.Main>
-          <Box>
-            {showWelcome && <Welcome />}
-            {children}
-          </Box>
+          <Box>{children}</Box>
         </AppShell.Main>
       </AppShell>
     </>
