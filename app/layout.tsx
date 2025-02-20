@@ -17,7 +17,9 @@ export default function RootLayout({ children }: { children: any }) {
         />
       </head>
       <body>
-        <MantineProvider theme={theme}>{children}</MantineProvider>
+        <MantineProvider theme={theme}>
+          <AppShellLayout>{children}</AppShellLayout>
+        </MantineProvider>
       </body>
     </html>
   );
