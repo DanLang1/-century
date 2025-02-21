@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { IconSend2 } from '@tabler/icons-react';
+import { IconSend2, IconUsersGroup } from '@tabler/icons-react';
 import { produce } from 'immer';
 import {
   ActionIcon,
   Avatar,
+  Button,
   Center,
+  Drawer,
   Grid,
   Group,
   Paper,
@@ -18,7 +20,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { getHotkeyHandler, useFocusReturn, useMediaQuery } from '@mantine/hooks';
+import { getHotkeyHandler, useDisclosure, useFocusReturn, useMediaQuery } from '@mantine/hooks';
 
 interface Chat {
   message: string;
@@ -35,6 +37,7 @@ export function ChatBox() {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})px`);
   const [messages, setMessages] = useState<string[]>([]);
+  const [opened, { toggle }] = useDisclosure();
 
   // const chatArea = {
   //   height: isMobile ? '100vh' : '80vh',
@@ -84,9 +87,27 @@ export function ChatBox() {
   return (
     <Center pt="xl">
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
-        <Paper size="md" w="60vw" shadow="md" bd="md" p="lg" bg="var(--mantine-color-blue-light)">
+        <Paper
+          size="md"
+          w={{ base: '90vw', sm: '50vw', md: '60vw', lg: '50vw' }}
+          shadow="md"
+          bd="md"
+          p="lg"
+          bg="var(--mantine-color-blue-light)"
+        >
           <Grid>
-            <Grid.Col span={9}>
+            <Grid.Col span={{ base: 12, sm: 9 }}>
+              <Group pb="sm" justify="flex-end" hiddenFrom="sm">
+                <ActionIcon
+                  variant="gradient"
+                  size="md"
+                  aria-label="Gradient action icon"
+                  gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
+                  onClick={toggle}
+                >
+                  <IconUsersGroup />
+                </ActionIcon>
+              </Group>
               <Stack>
                 <ScrollArea
                   h="400"
@@ -114,7 +135,24 @@ export function ChatBox() {
                 />
               </Stack>
             </Grid.Col>
-            <Grid.Col span={3}>
+            {/* for small screens */}
+            <Drawer
+              offset={8}
+              radius="md"
+              opened={opened}
+              onClose={toggle}
+              title="Users"
+              position="right"
+            >
+              {users.map((user, index) => (
+                <Group key={index} align="center">
+                  <Avatar radius="xl" size="sm" />
+                  <Text>{user}</Text>
+                </Group>
+              ))}
+            </Drawer>
+            {/* for large screens */}
+            <Grid.Col span={3} visibleFrom="sm">
               <ScrollArea
                 h="400"
                 type="always"
