@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { IconSend2, IconUsersGroup } from '@tabler/icons-react';
+import { IconSend2, IconUser, IconUsersGroup } from '@tabler/icons-react';
 import { produce } from 'immer';
 import {
   ActionIcon,
@@ -11,33 +11,44 @@ import {
   Drawer,
   Grid,
   Group,
+  Modal,
   Paper,
   ScrollArea,
   Stack,
   Text,
   TextInput,
-  Title,
   useMantineTheme,
 } from '@mantine/core';
-import { useForm } from '@mantine/form';
-import { getHotkeyHandler, useDisclosure, useFocusReturn, useMediaQuery } from '@mantine/hooks';
+import { isNotEmpty, useForm } from '@mantine/form';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 
 interface Chat {
   message: string;
 }
+
+interface Message {
+  message: string;
+  user: string;
+  timestamp: string;
+}
+
 const demoProps = {
   bg: 'var(--mantine-color-blue-light)',
   h: 400,
   mt: 'md',
 };
 
-const users = ['Alice', 'Bob', 'Charlie', 'David'];
+const users = ['Rud', 'Sow', 'Azx', 'Vamp'];
 
 export function ChatBox() {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})px`);
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [user, setUser] = useState<string>('');
+  const [pendingMessage, setPendingMessage] = useState<string>('');
+
   const [opened, { toggle }] = useDisclosure();
+  const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
 
   // const chatArea = {
   //   height: isMobile ? '100vh' : '80vh',
@@ -57,6 +68,9 @@ export function ChatBox() {
     initialValues: {
       message: '',
     },
+    validate: {
+      message: isNotEmpty(),
+    },
   });
 
   useEffect(() => {
@@ -65,10 +79,18 @@ export function ChatBox() {
   }, [messages]);
 
   const handleSubmit = (values: Chat) => {
-    console.log(values);
+    if (!user) {
+      toggleModal();
+      setPendingMessage(values.message);
+      return;
+    }
     setMessages((prevMessages) =>
       produce(prevMessages, (draft) => {
-        draft.push(values.message);
+        draft.push({
+          message: values.message,
+          user: user === '' ? 'OstrichRider432' : user,
+          timestamp: new Date().toLocaleString(),
+        });
       })
     );
     form.reset();
@@ -76,16 +98,54 @@ export function ChatBox() {
     ref.current?.focus();
   };
 
-  const send = () => {
+  const send = (onClick?: () => void) => {
     return (
-      <ActionIcon type="submit" variant="transparent" aria-label="Send">
+      <ActionIcon
+        type="submit"
+        variant="transparent"
+        aria-label="Send"
+        onClick={onClick}
+        disabled={!form.isValid()}
+      >
         <IconSend2 />
       </ActionIcon>
     );
   };
 
+  const handleUserSet = () => {
+    toggleModal();
+    setMessages((prevMessages) =>
+      produce(prevMessages, (draft) => {
+        draft.push({
+          message: pendingMessage,
+          user: user === '' ? 'OstrichRider432' : user,
+          timestamp: new Date().toLocaleString(),
+        });
+      })
+    );
+    form.reset();
+    scrollToBottom();
+    ref.current?.focus();
+  };
+
   return (
     <Center pt="xl">
+      <Modal
+        opened={modalOpened}
+        onClose={toggleModal}
+        title="Please enter a username to use for chatting"
+      >
+        <TextInput
+          pt="sm"
+          placeholder="username"
+          leftSection={<IconUser />}
+          rightSection={send(handleUserSet)}
+          value={user}
+          onChange={(event) => setUser(event.currentTarget.value)}
+          required
+          maxLength={15}
+        />
+      </Modal>
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
         <Paper
           size="md"
@@ -97,6 +157,7 @@ export function ChatBox() {
         >
           <Grid>
             <Grid.Col span={{ base: 12, sm: 9 }}>
+              {/* small screen users button */}
               <Group pb="sm" justify="flex-end" hiddenFrom="sm">
                 <ActionIcon
                   variant="gradient"
@@ -117,11 +178,21 @@ export function ChatBox() {
                   p="md"
                 >
                   {messages.map((message, index) => (
-                    <Group key={index} align="flex-start" my="md>" mb="sm">
-                      <Avatar mt="sm" radius="lg" size="sm"></Avatar>
-                      <Paper p="sm">
-                        <Text size="sm">{message}</Text>
-                      </Paper>
+                    <Group key={index} align="flex-start" my="md" mb="sm">
+                      <Avatar mt="sm" radius="lg" size="sm" />
+                      <div>
+                        <Group gap="xs">
+                          <Text size="sm" weight={500}>
+                            {message.user}
+                          </Text>
+                          <Text size="xs" c="dimmed">
+                            {message.timestamp}
+                          </Text>
+                        </Group>
+                        <Paper p="sm" mt="xs">
+                          <Text size="sm">{message.message}</Text>
+                        </Paper>
+                      </div>
                     </Group>
                   ))}
                 </ScrollArea>
@@ -132,6 +203,7 @@ export function ChatBox() {
                   {...form.getInputProps('message')}
                   ref={ref}
                   rightSection={send()}
+                  {...form.getInputProps('message')}
                 />
               </Stack>
             </Grid.Col>
