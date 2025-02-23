@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createClient, RealtimeChannel } from '@supabase/supabase-js';
 import { IconSend2, IconUser, IconUsersGroup } from '@tabler/icons-react';
 import { produce } from 'immer';
 import {
@@ -21,6 +22,7 @@ import {
 } from '@mantine/core';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { AvatarSelector } from './AvatarSelector';
 
 interface Chat {
   message: string;
@@ -30,6 +32,7 @@ interface Message {
   message: string;
   user: string;
   timestamp: string;
+  avatar: string;
 }
 
 const demoProps = {
@@ -38,14 +41,21 @@ const demoProps = {
   mt: 'md',
 };
 
-const users = ['Rud', 'Sow', 'Azx', 'Vamp'];
+const users = [
+  { name: 'Rud', avatar: '/avatarIcons/1504.png' },
+  { name: 'Sow', avatar: '/avatarIcons/1619.png' },
+  { name: 'Azx', avatar: '/avatarIcons/196.png' },
+];
 
 export function ChatBox() {
+  const channel = useRef<RealtimeChannel | null>(null);
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})px`);
   const [messages, setMessages] = useState<Message[]>([]);
   const [user, setUser] = useState<string>('');
   const [pendingMessage, setPendingMessage] = useState<string>('');
+  const [avatar, setAvatar] = useState<string>('');
+  const [createUserNameVisible, setCreateUserNameVisible] = useState<boolean>(false);
 
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
@@ -74,6 +84,43 @@ export function ChatBox() {
   });
 
   useEffect(() => {
+    if (!channel.current) {
+      const client = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      channel.current = client.channel('chat-room', {
+        config: {
+          broadcast: {
+            self: true,
+          },
+        },
+      });
+
+      channel.current
+        .on('broadcast', { event: 'message' }, ({ payload }) => {
+          setMessages((prevMessages) =>
+            produce(prevMessages, (draft) => {
+              draft.push(
+                payload.message
+                // message: payload.message.message,
+                // user: user === '' ? 'OstrichRider432' : user,
+                // timestamp: new Date().toLocaleString(),
+              );
+            })
+          );
+        })
+        .subscribe();
+    }
+
+    return () => {
+      channel.current?.unsubscribe();
+      channel.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
     scrollToBottom();
     ref.current?.focus();
   }, [messages]);
@@ -84,29 +131,36 @@ export function ChatBox() {
       setPendingMessage(values.message);
       return;
     }
-    setMessages((prevMessages) =>
-      produce(prevMessages, (draft) => {
-        draft.push({
+    // setMessages((prevMessages) =>
+    //   produce(prevMessages, (draft) => {
+    //     draft.push({
+    //       message: values.message,
+    //       user: user === '' ? 'OstrichRider432' : user,
+    //       timestamp: new Date().toLocaleString(),
+    //     });
+    //   })
+    // );
+    if (!channel.current) return;
+    channel.current.send({
+      type: 'broadcast',
+      event: 'message',
+      payload: {
+        message: {
           message: values.message,
           user: user === '' ? 'OstrichRider432' : user,
           timestamp: new Date().toLocaleString(),
-        });
-      })
-    );
+          avatar: avatar,
+        },
+      },
+    });
     form.reset();
-    scrollToBottom();
-    ref.current?.focus();
+    // scrollToBottom();
+    // ref.current?.focus();
   };
 
-  const send = (onClick?: () => void) => {
+  const send = () => {
     return (
-      <ActionIcon
-        type="submit"
-        variant="transparent"
-        aria-label="Send"
-        onClick={onClick}
-        disabled={!form.isValid()}
-      >
+      <ActionIcon type="submit" variant="transparent" aria-label="Send" disabled={!form.isValid()}>
         <IconSend2 />
       </ActionIcon>
     );
@@ -120,6 +174,7 @@ export function ChatBox() {
           message: pendingMessage,
           user: user === '' ? 'OstrichRider432' : user,
           timestamp: new Date().toLocaleString(),
+          avatar: avatar,
         });
       })
     );
@@ -130,21 +185,23 @@ export function ChatBox() {
 
   return (
     <Center pt="xl">
-      <Modal
-        opened={modalOpened}
-        onClose={toggleModal}
-        title="Please enter a username to use for chatting"
-      >
-        <TextInput
-          pt="sm"
-          placeholder="username"
-          leftSection={<IconUser />}
-          rightSection={send(handleUserSet)}
-          value={user}
-          onChange={(event) => setUser(event.currentTarget.value)}
-          required
-          maxLength={15}
-        />
+      <Modal opened={modalOpened} onClose={toggleModal} title="Select User Icon and Username">
+        <Stack>
+          <AvatarSelector value={avatar} setValue={setAvatar} />
+
+          <TextInput
+            pt="sm"
+            placeholder="username"
+            leftSection={<IconUser />}
+            value={user}
+            onChange={(event) => setUser(event.currentTarget.value)}
+            required
+            maxLength={15}
+          />
+          <Button onClick={handleUserSet} disabled={user === ''}>
+            Continue
+          </Button>
+        </Stack>
       </Modal>
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
         <Paper
@@ -170,16 +227,10 @@ export function ChatBox() {
                 </ActionIcon>
               </Group>
               <Stack>
-                <ScrollArea
-                  h="400"
-                  type="always"
-                  viewportRef={viewport}
-                  bd="1px solid var(--mantine-color-blue-light)"
-                  p="md"
-                >
+                <ScrollArea h="400" type="always" viewportRef={viewport} p="md">
                   {messages.map((message, index) => (
                     <Group key={index} align="flex-start" my="md" mb="sm">
-                      <Avatar mt="sm" radius="lg" size="sm" />
+                      <Avatar radius="lg" size="sm" src={message.avatar} mt="xl" />
                       <div>
                         <Group gap="xs">
                           <Text size="sm" weight={500}>
@@ -189,7 +240,7 @@ export function ChatBox() {
                             {message.timestamp}
                           </Text>
                         </Group>
-                        <Paper p="sm" mt="xs">
+                        <Paper p="sm">
                           <Text size="sm">{message.message}</Text>
                         </Paper>
                       </div>
@@ -228,15 +279,16 @@ export function ChatBox() {
               <ScrollArea
                 h="400"
                 type="always"
-                viewportRef={viewport}
+                // viewportRef={viewport}
                 p="md"
                 bg="var(--mantine-color-gray-light)"
+                bd="rounded"
               >
                 <Stack>
                   {users.map((user, index) => (
                     <Group key={index} align="center">
-                      <Avatar radius="xl" size="sm" />
-                      <Text>{user}</Text>
+                      <Avatar radius="xl" size="sm" src={user.avatar} />
+                      <Text>{user.name}</Text>
                     </Group>
                   ))}
                 </Stack>
