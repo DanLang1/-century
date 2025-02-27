@@ -1,15 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import {
-  createClient,
-  REALTIME_LISTEN_TYPES,
-  REALTIME_PRESENCE_LISTEN_EVENTS,
-  REALTIME_SUBSCRIBE_STATES,
-  RealtimeChannel,
-  RealtimeChannelSendResponse,
-} from '@supabase/supabase-js';
 import { IconSend2, IconUser, IconUsersGroup } from '@tabler/icons-react';
+import { useChannel, usePresence, usePresenceListener } from 'ably/react';
 import { produce } from 'immer';
 import {
   ActionIcon,
@@ -29,8 +22,6 @@ import {
 } from '@mantine/core';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import supabaseClient from '@/client';
-import { useCreateChatRoom } from '@/hooks/useCreateChatRoom';
 import { AvatarSelector } from './AvatarSelector';
 
 interface Chat {
@@ -41,6 +32,11 @@ export interface Message {
   message: string;
   user: string;
   timestamp: string;
+  avatar: string;
+}
+
+export interface User {
+  user: string;
   avatar: string;
 }
 
@@ -56,13 +52,12 @@ const users = [
   { name: 'Azx', avatar: '/avatarIcons/196.png' },
 ];
 
-export function ChatBox() {
+export function ChatBoxAbly() {
   const userStatus = {
     user: 'user-1',
     online_at: new Date().toISOString(),
   };
 
-  const channel = useRef<RealtimeChannel | null>(null);
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})px`);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -74,22 +69,17 @@ export function ChatBox() {
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
 
-  // useCreateChatRoom({
-  //   onMessage: (message) => {
-  //     setMessages((prevMessages) =>
-  //       produce(prevMessages, (draft) => {
-  //         draft.push(message);
-  //       })
-  //     );
-  //   },
-  // });
-
-  // const chatArea = {
-  //   height: isMobile ? '100vh' : '80vh',
-  //   width: '600px',
-  //   display: 'flex',
-  //   bg: 'var(--mantine-color-blue-light)',
-  // };
+  const { channel, ably } = useChannel('chat-demo', (message) => {
+    console.log(message);
+    // const history = receivedMessages.slice(-199);
+    setMessages((prevMessages) =>
+      produce(prevMessages, (draft) => {
+        draft.push(message.data);
+      })
+    );
+  });
+  const { updateStatus } = usePresence('chat-demo');
+  const { presenceData } = usePresenceListener('chat-demo');
 
   const ref = useRef<HTMLInputElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
@@ -108,54 +98,6 @@ export function ChatBox() {
   });
 
   useEffect(() => {
-    if (!channel.current) {
-      const client = supabaseClient;
-      channel.current = client.channel('chat-room', {
-        config: {
-          broadcast: {
-            self: true,
-          },
-        },
-      });
-      channel.current
-        .on('broadcast', { event: 'message' }, ({ payload }) => {
-          setMessages((prevMessages) =>
-            produce(prevMessages, (draft) => {
-              draft.push(payload.message);
-            })
-          );
-        })
-        .subscribe();
-      let roomChannel = client.channel('rooms', { config: { presence: { key: 'presenceKey' } } });
-      roomChannel.on(
-        REALTIME_LISTEN_TYPES.PRESENCE,
-        { event: REALTIME_PRESENCE_LISTEN_EVENTS.SYNC },
-        () => {
-          console.log(roomChannel);
-        }
-      );
-      roomChannel.subscribe(async (status: `${REALTIME_SUBSCRIBE_STATES}`) => {
-        if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
-          const resp: RealtimeChannelSendResponse = await roomChannel.track({ user: user });
-
-          if (resp === 'ok') {
-            console.log(user);
-          } else {
-            console.log('failure');
-          }
-        }
-      });
-    } else {
-      console.log('test');
-    }
-
-    return () => {
-      channel.current?.unsubscribe();
-      channel.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
     scrollToBottom();
     ref.current?.focus();
   }, [messages]);
@@ -166,29 +108,14 @@ export function ChatBox() {
       setPendingMessage(values.message);
       return;
     }
-    // setMessages((prevMessages) =>
-    //   produce(prevMessages, (draft) => {
-    //     draft.push({
-    //       message: values.message,
-    //       user: user === '' ? 'OstrichRider432' : user,
-    //       timestamp: new Date().toLocaleString(),
-    //       avatar: avatar,
-    //     });
-    //   })
-    // );
-    if (!channel.current) return;
-    channel.current.send({
-      type: 'broadcast',
-      event: 'message',
-      payload: {
-        message: {
-          message: values.message,
-          user: user === '' ? 'OstrichRider432' : user,
-          timestamp: new Date().toLocaleString(),
-          avatar: avatar,
-        },
-      },
-    });
+    const message: Message = {
+      message: values.message,
+      user: user === '' ? 'OstrichRider432' : user,
+      timestamp: new Date().toLocaleString(),
+      avatar: avatar,
+    };
+    channel.publish({ name: 'chat-message', data: message });
+
     form.reset();
   };
 
@@ -202,29 +129,18 @@ export function ChatBox() {
 
   const handleUserSet = () => {
     toggleModal();
-    if (!channel.current) return;
-    channel.current.send({
-      type: 'broadcast',
-      event: 'message',
-      payload: {
-        message: {
-          message: pendingMessage,
-          user: user === '' ? 'OstrichRider432' : user,
-          timestamp: new Date().toLocaleString(),
-          avatar: avatar,
-        },
-      },
-    });
-    // setMessages((prevMessages) =>
-    //   produce(prevMessages, (draft) => {
-    //     draft.push({
-    //       message: pendingMessage,
-    //       user: user === '' ? 'OstrichRider432' : user,
-    //       timestamp: new Date().toLocaleString(),
-    //       avatar: avatar,
-    //     });
-    //   })
-    // );
+    const message: Message = {
+      message: pendingMessage,
+      user: user === '' ? 'OstrichRider432' : user,
+      timestamp: new Date().toLocaleString(),
+      avatar: avatar,
+    };
+    channel.publish({ name: 'chat-message', data: message });
+    const userInfo: User = {
+      user: user,
+      avatar: avatar,
+    };
+    updateStatus(userInfo);
     form.reset();
   };
 
@@ -312,11 +228,15 @@ export function ChatBox() {
               title="Users"
               position="right"
             >
-              {users.map((user, index) => (
+              {presenceData.map((user, index) => (
                 <Stack key={index} mt="sm">
                   <Group align="center" gap="sm">
-                    <Avatar radius="xl" size="sm" src={user.avatar} />
-                    <Text>{user.name}</Text>
+                    <Avatar
+                      radius="xl"
+                      size="sm"
+                      src={user.data?.avatar ?? '/avatarIcons/303.png'}
+                    />
+                    <Text>{user.data?.user ?? 'RandoGuest'}</Text>
                   </Group>
                 </Stack>
               ))}
@@ -332,10 +252,14 @@ export function ChatBox() {
                 bd="rounded"
               >
                 <Stack>
-                  {users.map((user, index) => (
+                  {presenceData.map((user, index) => (
                     <Group key={index} align="center">
-                      <Avatar radius="xl" size="sm" src={user.avatar} />
-                      <Text>{user.name}</Text>
+                      <Avatar
+                        radius="xl"
+                        size="sm"
+                        src={user.data?.avatar ?? '/avatarIcons/303.png'}
+                      />
+                      <Text>{user.data?.user ?? 'RandoGuest'}</Text>
                     </Group>
                   ))}
                 </Stack>
