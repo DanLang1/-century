@@ -23,6 +23,7 @@ import {
 import { isNotEmpty, useForm } from '@mantine/form';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { AvatarSelector } from './AvatarSelector';
+import { UserSelectModal } from './UserSelectModal';
 
 interface Chat {
   message: string;
@@ -46,34 +47,23 @@ const demoProps = {
   mt: 'md',
 };
 
-const users = [
-  { name: 'Rud', avatar: '/avatarIcons/1504.png' },
-  { name: 'Sow', avatar: '/avatarIcons/1619.png' },
-  { name: 'Azx', avatar: '/avatarIcons/196.png' },
-];
-
 export function ChatBoxAbly() {
-  const userStatus = {
-    user: 'user-1',
-    online_at: new Date().toISOString(),
-  };
-
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})px`);
   const [messages, setMessages] = useState<Message[]>([]);
   const [user, setUser] = useState<string>('');
   const [pendingMessage, setPendingMessage] = useState<string>('');
   const [avatar, setAvatar] = useState<string>('');
-  const [createUserNameVisible, setCreateUserNameVisible] = useState<boolean>(false);
 
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
 
   const { channel, ably } = useChannel('chat-demo', (message) => {
-    console.log(message);
-    // const history = receivedMessages.slice(-199);
     setMessages((prevMessages) =>
       produce(prevMessages, (draft) => {
+        if (draft.length > 200) {
+          draft.shift();
+        }
         draft.push(message.data);
       })
     );
@@ -97,6 +87,13 @@ export function ChatBoxAbly() {
     },
   });
 
+  const userForm = useForm<User>({
+    mode: 'uncontrolled',
+    validate: {
+      user: isNotEmpty(),
+    },
+  });
+
   useEffect(() => {
     scrollToBottom();
     ref.current?.focus();
@@ -115,7 +112,6 @@ export function ChatBoxAbly() {
       avatar: avatar,
     };
     channel.publish({ name: 'chat-message', data: message });
-
     form.reset();
   };
 
@@ -146,24 +142,16 @@ export function ChatBoxAbly() {
 
   return (
     <Center pt="xl">
-      <Modal opened={modalOpened} onClose={toggleModal} title="Select User Icon and Username">
-        <Stack>
-          <AvatarSelector value={avatar} setValue={setAvatar} />
+      <UserSelectModal
+        modalOpened={modalOpened}
+        toggleModal={toggleModal}
+        user={user}
+        setUser={setUser}
+        avatar={avatar}
+        setAvatar={setAvatar}
+        handleContinue={handleUserSet}
+      />
 
-          <TextInput
-            pt="sm"
-            placeholder="username"
-            leftSection={<IconUser />}
-            value={user}
-            onChange={(event) => setUser(event.currentTarget.value)}
-            required
-            maxLength={15}
-          />
-          <Button onClick={handleUserSet} disabled={user === ''}>
-            Continue
-          </Button>
-        </Stack>
-      </Modal>
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
         <Paper
           size="md"
@@ -215,7 +203,6 @@ export function ChatBoxAbly() {
                   {...form.getInputProps('message')}
                   ref={ref}
                   rightSection={send()}
-                  {...form.getInputProps('message')}
                 />
               </Stack>
             </Grid.Col>
