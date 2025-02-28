@@ -1,56 +1,32 @@
 import { IconUser } from '@tabler/icons-react';
-import {
-  ActionIcon,
-  Avatar,
-  Button,
-  Center,
-  Drawer,
-  Grid,
-  Group,
-  Modal,
-  Paper,
-  ScrollArea,
-  Stack,
-  Text,
-  TextInput,
-  useMantineTheme,
-} from '@mantine/core';
+import { Button, Modal, Stack, TextInput } from '@mantine/core';
+import { UseFormReturnType } from '@mantine/form';
 import { AvatarSelector } from './AvatarSelector';
+import { User } from './ChatBoxAbly';
 
 export interface UserSelectModalProps {
   modalOpened: boolean;
   toggleModal: () => void;
-  avatar: string;
-  setAvatar: (val: string) => void;
-  user: string;
-  setUser: (val: string) => void;
-  handleContinue: () => void;
+  form: UseFormReturnType<User>;
 }
 
-export function UserSelectModal({
-  modalOpened,
-  toggleModal,
-  avatar,
-  setAvatar,
-  user,
-  setUser,
-  handleContinue,
-}: UserSelectModalProps) {
+export function UserSelectModal({ modalOpened, toggleModal, form }: UserSelectModalProps) {
   return (
     <Modal opened={modalOpened} onClose={toggleModal} title="Select User Icon and Username">
       <Stack>
-        <AvatarSelector value={avatar} setValue={setAvatar} />
+        <AvatarSelector form={form} />
 
         <TextInput
           pt="sm"
           placeholder="username"
           leftSection={<IconUser />}
-          value={user}
-          onChange={(event) => setUser(event.currentTarget.value)}
           required
           maxLength={15}
+          key={form.key('user')}
+          {...form.getInputProps('user')}
+          form="userForm"
         />
-        <Button onClick={handleContinue} disabled={user === ''}>
+        <Button form="userForm" type="submit" disabled={!form.isValid()}>
           Continue
         </Button>
       </Stack>

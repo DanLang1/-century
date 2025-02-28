@@ -1,18 +1,16 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { IconSend2, IconUser, IconUsersGroup } from '@tabler/icons-react';
+import { IconSend2, IconUsersGroup } from '@tabler/icons-react';
 import { useChannel, usePresence, usePresenceListener } from 'ably/react';
 import { produce } from 'immer';
 import {
   ActionIcon,
   Avatar,
-  Button,
   Center,
   Drawer,
   Grid,
   Group,
-  Modal,
   Paper,
   ScrollArea,
   Stack,
@@ -22,7 +20,7 @@ import {
 } from '@mantine/core';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { AvatarSelector } from './AvatarSelector';
+import { ChatMessage } from './ChatMessage';
 import { UserSelectModal } from './UserSelectModal';
 
 interface Chat {
@@ -89,8 +87,17 @@ export function ChatBoxAbly() {
 
   const userForm = useForm<User>({
     mode: 'uncontrolled',
+    initialValues: {
+      user: '',
+      avatar: '',
+    },
     validate: {
-      user: isNotEmpty(),
+      user: (value) => {
+        if (presenceData?.some((presence) => presence.data?.user === value)) {
+          return 'Someone already has this username :(';
+        }
+        isNotEmpty();
+      },
     },
   });
 
@@ -123,34 +130,30 @@ export function ChatBoxAbly() {
     );
   };
 
-  const handleUserSet = () => {
+  const handleUserSetForm = (values: User) => {
     toggleModal();
     const message: Message = {
       message: pendingMessage,
-      user: user === '' ? 'OstrichRider432' : user,
-      timestamp: new Date().toLocaleString(),
-      avatar: avatar,
+      user: values.user,
+      timestamp: new Date().toISOString(),
+      avatar: values.avatar,
     };
     channel.publish({ name: 'chat-message', data: message });
     const userInfo: User = {
-      user: user,
-      avatar: avatar,
+      user: values.user,
+      avatar: values.avatar,
     };
     updateStatus(userInfo);
+    setUser(values.user);
+    setAvatar(values.avatar);
     form.reset();
   };
 
   return (
     <Center pt={{ base: 'sm', md: 'xl' }}>
-      <UserSelectModal
-        modalOpened={modalOpened}
-        toggleModal={toggleModal}
-        user={user}
-        setUser={setUser}
-        avatar={avatar}
-        setAvatar={setAvatar}
-        handleContinue={handleUserSet}
-      />
+      <form id="userForm" onSubmit={userForm.onSubmit((values) => handleUserSetForm(values))}>
+        <UserSelectModal modalOpened={modalOpened} toggleModal={toggleModal} form={userForm} />
+      </form>
 
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
         <Paper
@@ -176,24 +179,9 @@ export function ChatBoxAbly() {
                 </ActionIcon>
               </Group>
               <Stack>
-                <ScrollArea h="400" type="always" viewportRef={viewport} p="md">
+                <ScrollArea h="400" type="always" viewportRef={viewport} p="sm">
                   {messages.map((message, index) => (
-                    <Group key={index} align="flex-start" my="md" mb="sm">
-                      <Avatar radius="lg" size="sm" src={message.avatar} mt="xl" />
-                      <div>
-                        <Group gap="xs">
-                          <Text size="sm" weight={500}>
-                            {message.user}
-                          </Text>
-                          <Text size="xs" c="dimmed">
-                            {message.timestamp}
-                          </Text>
-                        </Group>
-                        <Paper p="sm">
-                          <Text size="sm">{message.message}</Text>
-                        </Paper>
-                      </div>
-                    </Group>
+                    <ChatMessage key={index} message={message} />
                   ))}
                 </ScrollArea>
                 <TextInput
@@ -223,7 +211,7 @@ export function ChatBoxAbly() {
                       size="sm"
                       src={user.data?.avatar ?? '/avatarIcons/303.png'}
                     />
-                    <Text>{user.data?.user ?? 'RandoGuest'}</Text>
+                    <Text>{user.data?.user ?? 'xatRando'}</Text>
                   </Group>
                 </Stack>
               ))}
@@ -233,7 +221,6 @@ export function ChatBoxAbly() {
               <ScrollArea
                 h="400"
                 type="always"
-                // viewportRef={viewport}
                 p="md"
                 bg="var(--mantine-color-gray-light)"
                 bd="rounded"
@@ -246,7 +233,7 @@ export function ChatBoxAbly() {
                         size="sm"
                         src={user.data?.avatar ?? '/avatarIcons/303.png'}
                       />
-                      <Text>{user.data?.user ?? 'RandoGuest'}</Text>
+                      <Text>{user.data?.user ?? 'xatRando'}</Text>
                     </Group>
                   ))}
                 </Stack>

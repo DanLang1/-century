@@ -1,12 +1,12 @@
-import { useState } from 'react';
 import { Avatar, Group, SegmentedControl } from '@mantine/core';
+import { UseFormReturnType } from '@mantine/form';
+import { User } from './ChatBoxAbly';
 
 interface AvatarSelectorProps {
-  value: string;
-  setValue: (value: string) => void;
+  form: UseFormReturnType<User>;
 }
 
-export function AvatarSelector({ value, setValue }: AvatarSelectorProps) {
+export function AvatarSelector({ form }: AvatarSelectorProps) {
   const users = [
     '/avatarIcons/1504.png',
     '/avatarIcons/1619.png',
@@ -16,8 +16,8 @@ export function AvatarSelector({ value, setValue }: AvatarSelectorProps) {
 
   return (
     <SegmentedControl
-      value={value}
-      onChange={setValue}
+      key={form.key('avatar')}
+      {...form.getInputProps('avatar')}
       data={users.map((user) => ({
         value: user,
         label: (
