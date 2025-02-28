@@ -141,7 +141,7 @@ export function ChatBoxAbly() {
   };
 
   return (
-    <Center pt="xl">
+    <Center pt={{ base: 'sm', md: 'xl' }}>
       <UserSelectModal
         modalOpened={modalOpened}
         toggleModal={toggleModal}

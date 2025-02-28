@@ -10,7 +10,7 @@ export function Welcome() {
           Century
         </Text>
       </Title>
-      <Text c="dimmed" ta="center" size="lg" maw={580} mx="auto" mt={{ base: 'sm', md: 'xl' }}>
+      <Text c="dimmed" ta="center" size="lg" maw={580} mx="auto" mt={{ base: 0, md: 'xl' }}>
         A century ago where pr2 was found
         {/* This starter Next.js project includes a minimal setup for server side rendering, if you want
         to learn more on Mantine + Next.js integration follow{' '}
