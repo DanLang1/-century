@@ -185,7 +185,7 @@ export function ChatBoxAbly() {
                 </ActionIcon>
               </Group>
               <Stack>
-                <ScrollArea h="60vh" type="always" viewportRef={viewport} p="sm">
+                <ScrollArea h="50vh" type="always" viewportRef={viewport} p="sm">
                   {messages.map((message, index) => (
                     <ChatMessage key={index} message={message} />
                   ))}
