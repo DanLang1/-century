@@ -56,6 +56,12 @@ export function ChatBoxAbly() {
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
 
+  const { updateStatus } = usePresence('chat-demo', {
+    user: 'xatRando',
+    avatar: '/avatarIcons/303.png',
+  });
+  const { presenceData } = usePresenceListener('chat-demo');
+
   const { channel, ably } = useChannel('chat-demo', (message) => {
     setMessages((prevMessages) =>
       produce(prevMessages, (draft) => {
@@ -66,8 +72,8 @@ export function ChatBoxAbly() {
       })
     );
   });
-  const { updateStatus } = usePresence('chat-demo');
-  const { presenceData } = usePresenceListener('chat-demo');
+
+  // channel.presence.enter({ user: user, avatar: avatar });
 
   const ref = useRef<HTMLInputElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
@@ -179,7 +185,7 @@ export function ChatBoxAbly() {
                 </ActionIcon>
               </Group>
               <Stack>
-                <ScrollArea h="400" type="always" viewportRef={viewport} p="sm">
+                <ScrollArea h="60vh" type="always" viewportRef={viewport} p="sm">
                   {messages.map((message, index) => (
                     <ChatMessage key={index} message={message} />
                   ))}
@@ -206,12 +212,8 @@ export function ChatBoxAbly() {
               {presenceData.map((user, index) => (
                 <Stack key={index} mt="sm">
                   <Group align="center" gap="sm">
-                    <Avatar
-                      radius="xl"
-                      size="sm"
-                      src={user.data?.avatar ?? '/avatarIcons/303.png'}
-                    />
-                    <Text>{user.data?.user ?? 'xatRando'}</Text>
+                    <Avatar radius="xl" size="sm" src={user.data?.avatar} />
+                    <Text>{user.data?.user}</Text>
                   </Group>
                 </Stack>
               ))}
@@ -219,7 +221,7 @@ export function ChatBoxAbly() {
             {/* for large screens */}
             <Grid.Col span={3} visibleFrom="sm">
               <ScrollArea
-                h="400"
+                h="60vh"
                 type="always"
                 p="md"
                 bg="var(--mantine-color-gray-light)"
@@ -228,12 +230,8 @@ export function ChatBoxAbly() {
                 <Stack>
                   {presenceData.map((user, index) => (
                     <Group key={index} align="center">
-                      <Avatar
-                        radius="xl"
-                        size="sm"
-                        src={user.data?.avatar ?? '/avatarIcons/303.png'}
-                      />
-                      <Text>{user.data?.user ?? 'xatRando'}</Text>
+                      <Avatar radius="xl" size="sm" src={user.data?.avatar} />
+                      <Text>{user.data?.user}</Text>
                     </Group>
                   ))}
                 </Stack>
