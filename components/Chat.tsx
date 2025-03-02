@@ -2,7 +2,7 @@
 
 import * as Ably from 'ably';
 import { AblyProvider, ChannelProvider } from 'ably/react';
-import { ChatBoxAbly } from './ChatBoxAbly';
+import { ChatBox } from './ChatBox';
 
 export default function Chat() {
   const client = new Ably.Realtime({ authUrl: '/api' });
@@ -10,7 +10,7 @@ export default function Chat() {
   return (
     <AblyProvider client={client}>
       <ChannelProvider channelName="chat-demo">
-        <ChatBoxAbly />
+        <ChatBox />
       </ChannelProvider>
     </AblyProvider>
   );

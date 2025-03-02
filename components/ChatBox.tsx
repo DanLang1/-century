@@ -20,6 +20,7 @@ import {
 } from '@mantine/core';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { ActiveUserDisplay } from './ActiveUserDisplay';
 import { ChatMessage } from './ChatMessage';
 import { UserSelectModal } from './UserSelectModal';
 
@@ -29,14 +30,19 @@ interface Chat {
 
 export interface Message {
   message: string;
-  user: string;
+  user: UserInfo;
   timestamp: string;
+}
+
+export interface UserForm {
+  user: string;
   avatar: string;
 }
 
-export interface User {
-  user: string;
+export interface UserInfo {
+  username: string;
   avatar: string;
+  connectionId: string | null;
 }
 
 const demoProps = {
@@ -45,21 +51,23 @@ const demoProps = {
   mt: 'md',
 };
 
-export function ChatBoxAbly() {
+export function ChatBox() {
   const theme = useMantineTheme();
-  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})px`);
+
   const [messages, setMessages] = useState<Message[]>([]);
-  const [user, setUser] = useState<string>('');
+  // const [user, setUser] = useState<string>('');
   const [pendingMessage, setPendingMessage] = useState<string>('');
   const [avatar, setAvatar] = useState<string>('');
+  const [user, setUser] = useState<UserInfo>({
+    username: 'xatRando',
+    avatar: '/avatarIcons/303.png',
+    connectionId: null,
+  });
 
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
 
-  const { updateStatus } = usePresence('chat-demo', {
-    user: 'xatRando',
-    avatar: '/avatarIcons/303.png',
-  });
+  const { updateStatus } = usePresence('chat-demo', user);
   const { presenceData } = usePresenceListener('chat-demo');
 
   const { channel, ably } = useChannel('chat-demo', (message) => {
@@ -73,7 +81,16 @@ export function ChatBoxAbly() {
     );
   });
 
-  // channel.presence.enter({ user: user, avatar: avatar });
+  const currentConnectionId = ably.connection.id ?? '';
+  console.log(user.username);
+
+  const currUsers: UserInfo[] = presenceData.map((user) => {
+    return {
+      username: user.data?.username,
+      avatar: user.data?.avatar,
+      connectionId: user.connectionId,
+    };
+  });
 
   const ref = useRef<HTMLInputElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
@@ -91,18 +108,21 @@ export function ChatBoxAbly() {
     },
   });
 
-  const userForm = useForm<User>({
+  const userForm = useForm<UserForm>({
     mode: 'uncontrolled',
+    validateInputOnChange: true,
     initialValues: {
       user: '',
       avatar: '',
     },
     validate: {
       user: (value) => {
-        if (presenceData?.some((presence) => presence.data?.user === value)) {
-          return 'Someone already has this username :(';
+        if (value === '') {
+          return 'Please enter an username';
         }
-        isNotEmpty();
+        // if (presenceData?.some((presence) => presence.data?.user === value)) {
+        //   return 'Someone already has this username :(';
+        // }
       },
     },
   });
@@ -113,16 +133,15 @@ export function ChatBoxAbly() {
   }, [messages]);
 
   const handleSubmit = (values: Chat) => {
-    if (!user) {
+    if (user.username === 'xatRando') {
       toggleModal();
       setPendingMessage(values.message);
       return;
     }
     const message: Message = {
       message: values.message,
-      user: user === '' ? 'OstrichRider432' : user,
+      user: user,
       timestamp: new Date().toLocaleString(),
-      avatar: avatar,
     };
     channel.publish({ name: 'chat-message', data: message });
     form.reset();
@@ -136,23 +155,26 @@ export function ChatBoxAbly() {
     );
   };
 
-  const handleUserSetForm = (values: User) => {
-    toggleModal();
-    const message: Message = {
-      message: pendingMessage,
-      user: values.user,
-      timestamp: new Date().toISOString(),
+  const handleUserSetForm = (values: UserForm) => {
+    const userInfo: UserInfo = {
+      username: values.user,
       avatar: values.avatar,
+      connectionId: currentConnectionId,
     };
-    channel.publish({ name: 'chat-message', data: message });
-    const userInfo: User = {
-      user: values.user,
-      avatar: values.avatar,
-    };
+    if (pendingMessage !== '') {
+      const message: Message = {
+        message: pendingMessage,
+        user: userInfo,
+        timestamp: new Date().toISOString(),
+      };
+      channel.publish({ name: 'chat-message', data: message });
+    }
+
     updateStatus(userInfo);
-    setUser(values.user);
-    setAvatar(values.avatar);
+    setUser(userInfo);
+    setPendingMessage('');
     form.reset();
+    toggleModal();
   };
 
   return (
@@ -200,43 +222,13 @@ export function ChatBoxAbly() {
                 />
               </Stack>
             </Grid.Col>
-            {/* for small screens */}
-            <Drawer
-              offset={8}
-              radius="md"
+            <ActiveUserDisplay
               opened={opened}
-              onClose={toggle}
-              title="Users"
-              position="right"
-            >
-              {presenceData.map((user, index) => (
-                <Stack key={index} mt="sm">
-                  <Group align="center" gap="sm">
-                    <Avatar radius="xl" size="sm" src={user.data?.avatar} />
-                    <Text>{user.data?.user}</Text>
-                  </Group>
-                </Stack>
-              ))}
-            </Drawer>
-            {/* for large screens */}
-            <Grid.Col span={3} visibleFrom="sm">
-              <ScrollArea
-                h="50vh"
-                type="always"
-                p="md"
-                bg="var(--mantine-color-gray-light)"
-                bd="rounded"
-              >
-                <Stack>
-                  {presenceData.map((user, index) => (
-                    <Group key={index} align="center">
-                      <Avatar radius="xl" size="sm" src={user.data?.avatar} />
-                      <Text>{user.data?.user}</Text>
-                    </Group>
-                  ))}
-                </Stack>
-              </ScrollArea>
-            </Grid.Col>
+              toggle={toggle}
+              users={currUsers}
+              openUserModal={toggleModal}
+              currUserId={currentConnectionId}
+            />
           </Grid>
         </Paper>
       </form>

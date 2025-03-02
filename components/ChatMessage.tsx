@@ -1,5 +1,5 @@
 import { Avatar, Group, Paper, Stack, Text } from '@mantine/core';
-import { Message } from './ChatBoxAbly';
+import { Message } from './ChatBox';
 import classes from './ChatMessage.module.css';
 
 interface ChatMessageProps {
@@ -10,15 +10,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
   // timestamp is in UTC for standardization, convert to users local timezone so it shows correctly for them.
   const userTimeStamp = new Date(message.timestamp).toLocaleString();
   return (
-    <Group align="flex-start" my="xs" wrap="nowrap">
+    <Group align="flex-start" my="xs" wrap="nowrap" gap="xs">
       <Stack>
-        <Avatar size="md" src={message.avatar} mt="5" />
+        <Avatar size="md" src={message.user.avatar} mt="xs" />
       </Stack>
       <Stack gap="4">
         <Group gap="xs">
           <Group align="baseline" gap="xs">
             <Text size="md" weight={500}>
-              {message.user}
+              {message.user.username}
             </Text>
             <Text size="xs" c="dimmed">
               {userTimeStamp}

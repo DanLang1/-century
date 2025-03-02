@@ -2,12 +2,12 @@ import { IconUser } from '@tabler/icons-react';
 import { Button, Modal, Stack, TextInput } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { AvatarSelector } from './AvatarSelector';
-import { User } from './ChatBoxAbly';
+import { UserForm } from './ChatBox';
 
 export interface UserSelectModalProps {
   modalOpened: boolean;
   toggleModal: () => void;
-  form: UseFormReturnType<User>;
+  form: UseFormReturnType<UserForm>;
 }
 
 export function UserSelectModal({ modalOpened, toggleModal, form }: UserSelectModalProps) {
@@ -20,7 +20,6 @@ export function UserSelectModal({ modalOpened, toggleModal, form }: UserSelectMo
           pt="sm"
           placeholder="username"
           leftSection={<IconUser />}
-          required
           maxLength={15}
           key={form.key('user')}
           {...form.getInputProps('user')}
