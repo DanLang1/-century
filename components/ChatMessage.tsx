@@ -10,7 +10,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   // timestamp is in UTC for standardization, convert to users local timezone so it shows correctly for them.
   const userTimeStamp = new Date(message.timestamp).toLocaleString();
   return (
-    <Group align="flex-start" my="md" wrap="nowrap">
+    <Group align="flex-start" my="xs" wrap="nowrap">
       <Stack>
         <Avatar size="md" src={message.avatar} mt="5" />
       </Stack>
@@ -26,7 +26,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </Group>
         </Group>
         <Paper p="xs" radius="lg" style={{ width: 'fit-content' }}>
-          <Text size="md">{message.message}</Text>
+          <Text size="sm">{message.message}</Text>
         </Paper>
       </Stack>
     </Group>

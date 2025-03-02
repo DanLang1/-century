@@ -167,7 +167,7 @@ export function ChatBoxAbly() {
           w={{ base: '90vw', sm: '50vw', md: '60vw', lg: '50vw' }}
           shadow="md"
           bd="md"
-          p="lg"
+          p="sm"
           bg="var(--mantine-color-blue-light)"
         >
           <Grid>
@@ -185,7 +185,7 @@ export function ChatBoxAbly() {
                 </ActionIcon>
               </Group>
               <Stack>
-                <ScrollArea h="50vh" type="always" viewportRef={viewport} p="sm">
+                <ScrollArea h="50vh" type="always" viewportRef={viewport} p="0">
                   {messages.map((message, index) => (
                     <ChatMessage key={index} message={message} />
                   ))}
@@ -221,7 +221,7 @@ export function ChatBoxAbly() {
             {/* for large screens */}
             <Grid.Col span={3} visibleFrom="sm">
               <ScrollArea
-                h="60vh"
+                h="50vh"
                 type="always"
                 p="md"
                 bg="var(--mantine-color-gray-light)"
