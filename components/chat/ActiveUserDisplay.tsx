@@ -8,7 +8,7 @@ import {
   Text,
   UnstyledButton,
 } from '@mantine/core';
-import { UserInfo } from './ChatBox';
+import { UserInfo } from './chat.interfaces';
 
 interface ActiveUserDisplayProps {
   opened: boolean;

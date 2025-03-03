@@ -1,6 +1,6 @@
 import { Avatar, Group, SegmentedControl } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
-import { UserForm } from './ChatBox';
+import { UserForm } from './chat.interfaces';
 
 interface AvatarSelectorProps {
   form: UseFormReturnType<UserForm>;
