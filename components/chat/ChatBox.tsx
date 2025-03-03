@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { IconSend2, IconUsersGroup } from '@tabler/icons-react';
+import { IconSend2 } from '@tabler/icons-react';
 import { useChannel, usePresence, usePresenceListener } from 'ably/react';
 import { produce } from 'immer';
 import {
@@ -17,6 +17,7 @@ import {
 } from '@mantine/core';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { readLocalStorageValue, useDisclosure, useLocalStorage } from '@mantine/hooks';
+import { ActiveAvatarDisplay } from './ActiveAvatarDisplay';
 import { ActiveUserDisplay } from './ActiveUserDisplay';
 import { Chat, Message, UserForm, UserInfo } from './chat.interfaces';
 import { ChatMessage } from './ChatMessage';
@@ -182,15 +183,7 @@ export function ChatBox() {
             <Grid.Col span={{ base: 12, sm: 9 }}>
               {/* small screen users button */}
               <Group pb="sm" justify="flex-end" hiddenFrom="sm">
-                <ActionIcon
-                  variant="gradient"
-                  size="md"
-                  aria-label="Gradient action icon"
-                  gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-                  onClick={toggle}
-                >
-                  <IconUsersGroup />
-                </ActionIcon>
+                <ActiveAvatarDisplay users={currUsers} openDrawer={toggle} />
               </Group>
               <Stack>
                 <ScrollArea h="50vh" type="always" viewportRef={viewport} p="0">
