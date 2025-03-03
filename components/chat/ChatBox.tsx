@@ -6,44 +6,21 @@ import { useChannel, usePresence, usePresenceListener } from 'ably/react';
 import { produce } from 'immer';
 import {
   ActionIcon,
-  Avatar,
   Center,
-  Drawer,
   Grid,
   Group,
   Paper,
   ScrollArea,
   Stack,
-  Text,
   TextInput,
   useMantineTheme,
 } from '@mantine/core';
 import { isNotEmpty, useForm } from '@mantine/form';
-import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { readLocalStorageValue, useDisclosure, useLocalStorage } from '@mantine/hooks';
 import { ActiveUserDisplay } from './ActiveUserDisplay';
+import { Chat, Message, UserForm, UserInfo } from './chat.interfaces';
 import { ChatMessage } from './ChatMessage';
 import { UserSelectModal } from './UserSelectModal';
-
-interface Chat {
-  message: string;
-}
-
-export interface Message {
-  message: string;
-  user: UserInfo;
-  timestamp: string;
-}
-
-export interface UserForm {
-  user: string;
-  avatar: string;
-}
-
-export interface UserInfo {
-  username: string;
-  avatar: string;
-  connectionId: string | null;
-}
 
 const demoProps = {
   bg: 'var(--mantine-color-blue-light)',
@@ -57,17 +34,22 @@ export function ChatBox() {
   const [messages, setMessages] = useState<Message[]>([]);
   // const [user, setUser] = useState<string>('');
   const [pendingMessage, setPendingMessage] = useState<string>('');
-  const [avatar, setAvatar] = useState<string>('');
-  const [user, setUser] = useState<UserInfo>({
-    username: 'xatRando',
-    avatar: '/avatarIcons/303.png',
-    connectionId: null,
+
+  const [user, setUser] = useLocalStorage<UserInfo>({
+    key: 'user-info',
+    defaultValue: {
+      username: 'xatRando',
+      avatar: '/avatarIcons/303.png',
+    },
   });
 
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
 
-  const { updateStatus } = usePresence('chat-demo', user);
+  const { updateStatus } = usePresence(
+    'chat-demo',
+    readLocalStorageValue({ key: 'user-info' }) ?? user
+  );
   const { presenceData } = usePresenceListener('chat-demo');
 
   const { channel, ably } = useChannel('chat-demo', (message) => {
@@ -82,13 +64,12 @@ export function ChatBox() {
   });
 
   const currentConnectionId = ably.connection.id ?? '';
-  console.log(user.username);
 
-  const currUsers: UserInfo[] = presenceData.map((user) => {
+  const currUsers: UserInfo[] = presenceData.map((presData) => {
     return {
-      username: user.data?.username,
-      avatar: user.data?.avatar,
-      connectionId: user.connectionId,
+      username: presData.data?.username,
+      avatar: presData.data?.avatar,
+      connectionId: presData.connectionId,
     };
   });
 
@@ -120,9 +101,14 @@ export function ChatBox() {
         if (value === '') {
           return 'Please enter an username';
         }
-        // if (presenceData?.some((presence) => presence.data?.user === value)) {
-        //   return 'Someone already has this username :(';
-        // }
+        if (
+          presenceData?.some(
+            (presence) =>
+              presence.data?.username === value && presence.data?.username !== user.username
+          )
+        ) {
+          return 'Someone already has this username :(';
+        }
       },
     },
   });
@@ -159,7 +145,7 @@ export function ChatBox() {
     const userInfo: UserInfo = {
       username: values.user,
       avatar: values.avatar,
-      connectionId: currentConnectionId,
+      // connectionId: currentConnectionId,
     };
     if (pendingMessage !== '') {
       const message: Message = {

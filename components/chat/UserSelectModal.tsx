@@ -2,7 +2,7 @@ import { IconUser } from '@tabler/icons-react';
 import { Button, Modal, Stack, TextInput } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { AvatarSelector } from './AvatarSelector';
-import { UserForm } from './ChatBox';
+import { UserForm } from './chat.interfaces';
 
 export interface UserSelectModalProps {
   modalOpened: boolean;

@@ -1,6 +1,5 @@
 import { Avatar, Group, Paper, Stack, Text } from '@mantine/core';
-import { Message } from './ChatBox';
-import classes from './ChatMessage.module.css';
+import { Message } from './chat.interfaces';
 
 interface ChatMessageProps {
   message: Message;
