@@ -2931,12 +2931,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@supabase/auth-js@npm:2.67.3":
-  version: 2.67.3
-  resolution: "@supabase/auth-js@npm:2.67.3"
+"@supabase/auth-js@npm:2.68.0":
+  version: 2.68.0
+  resolution: "@supabase/auth-js@npm:2.68.0"
   dependencies:
     "@supabase/node-fetch": "npm:^2.6.14"
-  checksum: 10c0/59b29ba51e4c9e9d61b60db98005cec2007077e09489dbc82073919f8dd86364e0577c27e79993af528f9a077e564e2da222f4f22af71b1d1688d130098cb3e0
+  checksum: 10c0/99a9395b3c73bd3befc77c69041df4a68a23dff9fb6ae26aeb6ddd7ba49e666cbe5fe9618614bb85d22f2c2e636a9f4bf1f4de740f742022a4445dabecb857c2
   languageName: node
   linkType: hard
 
@@ -2958,12 +2958,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@supabase/postgrest-js@npm:1.18.1":
-  version: 1.18.1
-  resolution: "@supabase/postgrest-js@npm:1.18.1"
+"@supabase/postgrest-js@npm:1.19.2":
+  version: 1.19.2
+  resolution: "@supabase/postgrest-js@npm:1.19.2"
   dependencies:
     "@supabase/node-fetch": "npm:^2.6.14"
-  checksum: 10c0/63b28ffec4ff2d5d5c84e657dc67d454f79389b8a42c4d5e1a2a0091d49fb44c5f3ecac2cca77cc24cb734d10a1a19cf017ec39e14daec8caef5b365f73ee738
+  checksum: 10c0/9a14513f6cc5d9d249d13516eed29ecd5fcbea767ec6c1463fa8a133d933f2878ba4f65c76494f9259fe5f655d1096335656a75824c3401c542dade1b2201a15
   languageName: node
   linkType: hard
 
@@ -3000,17 +3000,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@supabase/supabase-js@npm:^2.48.1":
-  version: 2.48.1
-  resolution: "@supabase/supabase-js@npm:2.48.1"
+"@supabase/supabase-js@npm:^2.49.1":
+  version: 2.49.1
+  resolution: "@supabase/supabase-js@npm:2.49.1"
   dependencies:
-    "@supabase/auth-js": "npm:2.67.3"
+    "@supabase/auth-js": "npm:2.68.0"
     "@supabase/functions-js": "npm:2.4.4"
     "@supabase/node-fetch": "npm:2.6.15"
-    "@supabase/postgrest-js": "npm:1.18.1"
+    "@supabase/postgrest-js": "npm:1.19.2"
     "@supabase/realtime-js": "npm:2.11.2"
     "@supabase/storage-js": "npm:2.7.1"
-  checksum: 10c0/af0d7df273e416f7a34813f17bf37efe55455e21683a5d4a8a4baa739018589e9455539e1793804cb100d511adcdf5f4314944d025b2c3bfddfab53da9cd7dac
+  checksum: 10c0/432c6d3d07ad8e9645b3495ad92ef83042452433259268c0c9892c8e4f2ab8b26eadd2d7156dbb762ee18abe098d3bdae39a9176bb66934bcc62c89ec166869e
   languageName: node
   linkType: hard
 
@@ -8978,6 +8978,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mantine-form-zod-resolver@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "mantine-form-zod-resolver@npm:1.1.0"
+  peerDependencies:
+    "@mantine/form": ">=7.0.0"
+    zod: ">=3.0.0"
+  checksum: 10c0/3ff086f2a5d7b9d3d56b09f16fdc27919000c2007279c2e5e6fe85c60c56ee75a13cfebaa1dd341c4ddafd73aba9a3c59a98ea41c59ea8d01c67483dc07ea1ad
+  languageName: node
+  linkType: hard
+
 "mantine-next-template@workspace:.":
   version: 0.0.0-use.local
   resolution: "mantine-next-template@workspace:."
@@ -8993,7 +9003,7 @@ __metadata:
     "@storybook/nextjs": "npm:^8.1.10"
     "@storybook/react": "npm:^8.1.10"
     "@supabase/ssr": "npm:^0.5.2"
-    "@supabase/supabase-js": "npm:^2.48.1"
+    "@supabase/supabase-js": "npm:^2.49.1"
     "@tabler/icons-react": "npm:^3.27.1"
     "@testing-library/dom": "npm:^10.1.0"
     "@testing-library/jest-dom": "npm:^6.4.6"
@@ -9015,6 +9025,7 @@ __metadata:
     immer: "npm:^10.1.1"
     jest: "npm:^29.7.0"
     jest-environment-jsdom: "npm:^29.7.0"
+    mantine-form-zod-resolver: "npm:^1.1.0"
     next: "npm:15.1.0"
     postcss: "npm:^8.4.38"
     postcss-preset-mantine: "npm:^1.17.0"
@@ -9030,6 +9041,7 @@ __metadata:
     typescript: "npm:5.5.2"
     typescript-eslint: "npm:^8.14.0"
     yarn: "npm:^1.22.22"
+    zod: "npm:^3.24.2"
   languageName: unknown
   linkType: soft
 
@@ -13046,5 +13058,12 @@ __metadata:
   version: 1.1.1
   resolution: "yocto-queue@npm:1.1.1"
   checksum: 10c0/cb287fe5e6acfa82690acb43c283de34e945c571a78a939774f6eaba7c285bacdf6c90fbc16ce530060863984c906d2b4c6ceb069c94d1e0a06d5f2b458e2a92
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.24.2":
+  version: 3.24.2
+  resolution: "zod@npm:3.24.2"
+  checksum: 10c0/c638c7220150847f13ad90635b3e7d0321b36cce36f3fc6050ed960689594c949c326dfe2c6fa87c14b126ee5d370ccdebd6efb304f41ef5557a4aaca2824565
   languageName: node
   linkType: hard

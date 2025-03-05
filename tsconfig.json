@@ -18,7 +18,8 @@
     "incremental": true,
     "paths": {
       "@/components/*": ["components/*"],
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/utils/*": ["utils/*"]
     },
     "plugins": [{ "name": "next" }]
   },

@@ -11,7 +11,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <Group align="flex-start" my="xs" wrap="nowrap" gap="xs">
       <Stack>
-        <Avatar size="md" src={message.user.avatar} mt="xs" />
+        <Avatar size="md" src={message.user.avatar} mt="4" />
       </Stack>
       <Stack gap="4">
         <Group gap="xs">
