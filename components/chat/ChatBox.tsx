@@ -13,44 +13,28 @@ import {
   ScrollArea,
   Stack,
   TextInput,
-  useMantineTheme,
 } from '@mantine/core';
 import { isNotEmpty, useForm } from '@mantine/form';
-import { readLocalStorageValue, useDisclosure, useLocalStorage } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
+import { createAnonymousUser, updateUser } from '@/app/(main)/actions';
 import { ActiveAvatarDisplay } from './ActiveAvatarDisplay';
 import { ActiveUserDisplay } from './ActiveUserDisplay';
 import { Chat, Message, UserForm, UserInfo } from './chat.interfaces';
 import { ChatMessage } from './ChatMessage';
 import { UserSelectModal } from './UserSelectModal';
 
-const demoProps = {
-  bg: 'var(--mantine-color-blue-light)',
-  h: 400,
-  mt: 'md',
-};
+interface ChatProps {
+  user: UserInfo;
+}
 
-export function ChatBox() {
-  const theme = useMantineTheme();
-
+export function ChatBox({ user }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
-  // const [user, setUser] = useState<string>('');
   const [pendingMessage, setPendingMessage] = useState<string>('');
-
-  const [user, setUser] = useLocalStorage<UserInfo>({
-    key: 'user-info',
-    defaultValue: {
-      username: 'xatRando',
-      avatar: '/avatarIcons/303.png',
-    },
-  });
 
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
 
-  const { updateStatus } = usePresence(
-    'chat-demo',
-    readLocalStorageValue({ key: 'user-info' }) ?? user
-  );
+  const { updateStatus } = usePresence('chat-demo', user);
   const { presenceData } = usePresenceListener('chat-demo');
 
   const { channel, ably } = useChannel('chat-demo', (message) => {
@@ -64,13 +48,11 @@ export function ChatBox() {
     );
   });
 
-  const currentConnectionId = ably.connection.id ?? '';
-
   const currUsers: UserInfo[] = presenceData.map((presData) => {
     return {
       username: presData.data?.username,
       avatar: presData.data?.avatar,
-      connectionId: presData.connectionId,
+      id: presData.clientId,
     };
   });
 
@@ -94,18 +76,18 @@ export function ChatBox() {
     mode: 'uncontrolled',
     validateInputOnChange: true,
     initialValues: {
-      user: '',
+      username: '',
       avatar: '',
     },
     validate: {
-      user: (value) => {
+      username: (value) => {
         if (value === '') {
           return 'Please enter an username';
         }
         if (
           presenceData?.some(
             (presence) =>
-              presence.data?.username === value && presence.data?.username !== user.username
+              presence.data?.username === value && presence.data?.username !== user?.username
           )
         ) {
           return 'Someone already has this username :(';
@@ -120,7 +102,11 @@ export function ChatBox() {
   }, [messages]);
 
   const handleSubmit = (values: Chat) => {
-    if (user.username === 'xatRando') {
+    if (!user) {
+      console.log('error no user');
+      return;
+    }
+    if (user?.username === 'xatRando') {
       toggleModal();
       setPendingMessage(values.message);
       return;
@@ -142,11 +128,11 @@ export function ChatBox() {
     );
   };
 
-  const handleUserSetForm = (values: UserForm) => {
+  const handleUserSetForm = async (values: UserForm) => {
     const userInfo: UserInfo = {
-      username: values.user,
+      username: values.username,
       avatar: values.avatar,
-      // connectionId: currentConnectionId,
+      id: user?.id,
     };
     if (pendingMessage !== '') {
       const message: Message = {
@@ -157,8 +143,34 @@ export function ChatBox() {
       channel.publish({ name: 'chat-message', data: message });
     }
 
-    updateStatus(userInfo);
-    setUser(userInfo);
+    const formData = new FormData();
+    formData.append('username', values.username);
+    formData.append('avatar', values.avatar);
+
+    let userInfoFromDb: UserInfo = user;
+
+    if (user.id !== '') {
+      const result = await updateUser(formData, user.id);
+      if (result.errors) {
+        userForm.setErrors(result.errors);
+        return;
+      }
+      userInfoFromDb = {
+        username: result.data.username,
+        avatar: result.data.avatar,
+        id: result.data.id,
+      };
+    } else {
+      const result = await createAnonymousUser(formData);
+      if (result.errors) {
+        userForm.setErrors(result.errors);
+        setPendingMessage('');
+        return;
+      }
+      userInfoFromDb = result?.user ?? userInfoFromDb;
+    }
+
+    updateStatus(userInfoFromDb);
     setPendingMessage('');
     form.reset();
     toggleModal();
@@ -167,12 +179,16 @@ export function ChatBox() {
   return (
     <Center pt={{ base: 'sm', md: 'xl' }}>
       <form id="userForm" onSubmit={userForm.onSubmit((values) => handleUserSetForm(values))}>
-        <UserSelectModal modalOpened={modalOpened} toggleModal={toggleModal} form={userForm} />
+        <UserSelectModal
+          modalOpened={modalOpened}
+          toggleModal={toggleModal}
+          form={userForm}
+          user={user}
+        />
       </form>
 
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
         <Paper
-          size="md"
           w={{ base: '90vw', sm: '50vw', md: '60vw', lg: '50vw' }}
           shadow="md"
           bd="md"
@@ -206,7 +222,7 @@ export function ChatBox() {
               toggle={toggle}
               users={currUsers}
               openUserModal={toggleModal}
-              currUserId={currentConnectionId}
+              currUserId={user?.id}
             />
           </Grid>
         </Paper>

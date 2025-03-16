@@ -9,12 +9,13 @@ export interface Message {
 }
 
 export interface UserForm {
-  user: string;
+  username: string;
   avatar: string;
 }
 
 export interface UserInfo {
   username: string;
   avatar: string;
-  connectionId?: string;
+  id: string;
+  anonymous?: boolean;
 }

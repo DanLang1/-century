@@ -1,17 +1,41 @@
-'use client';
-
-import dynamic from 'next/dynamic';
+import { UserInfo } from '@/components/chat/chat.interfaces';
+import { ChatContainer } from '@/components/chat/ChatContainer';
 import { Welcome } from '@/components/Welcome/Welcome';
+import { createClient } from '@/utils/supabase/server';
 
-const Chat = dynamic(() => import('@/components/chat/Chat'), {
-  ssr: false,
-});
+export default async function HomePage() {
+  const supabase = await createClient();
 
-export default function HomePage() {
+  let currUser: UserInfo = {
+    username: 'xatRando',
+    avatar: '/avatarIcons/303.png',
+    id: '',
+  };
+
+  const { data } = await supabase.auth.getUser();
+
+  if (data.user) {
+    const { data: userInfo } = await supabase
+      .from('profiles')
+      .select('id,username, avatar, is_anon')
+      .eq('id', data?.user.id);
+
+    if (userInfo) {
+      const { id, username, avatar, is_anon } = userInfo[0];
+      currUser = {
+        id,
+        username,
+        avatar,
+        anonymous: is_anon,
+      };
+    }
+  }
+
   return (
     <>
       <Welcome />
-      <Chat />
+
+      <ChatContainer user={currUser} />
     </>
   );
 }

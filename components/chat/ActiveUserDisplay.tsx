@@ -28,6 +28,7 @@ export function ActiveUserDisplay({
     toggle();
     openUserModal();
   };
+
   return (
     <>
       {/* Small screens open a drawer to show users */}
@@ -41,7 +42,7 @@ export function ActiveUserDisplay({
       >
         {users.map((user, index) => (
           <Stack key={index} mt="sm">
-            {user.connectionId === currUserId ? (
+            {user.id === currUserId ? (
               <UnstyledButton onClick={onClickMobile}>
                 <Group align="center" gap="sm">
                   <Avatar radius="xl" size="sm" src={user.avatar} />
@@ -63,7 +64,7 @@ export function ActiveUserDisplay({
         <ScrollArea h="50vh" type="always" p="md" bg="var(--mantine-color-gray-light)" bd="rounded">
           <Stack>
             {users.map((user, index) =>
-              user.connectionId === currUserId ? (
+              user.id === currUserId ? (
                 <UnstyledButton key={index} onClick={openUserModal}>
                   <Group align="center">
                     <Avatar radius="xl" size="sm" src={user.avatar} />

@@ -26,6 +26,7 @@ export async function login(formData: FormData) {
 
   const { error } = await supabase.auth.signInWithPassword(request);
 
+  // todo: better error handling
   if (error) {
     redirect('/error');
   }
@@ -51,6 +52,19 @@ export async function signup(formData: FormData) {
     return { errors: fieldErrors, message: 'Validation failed' };
   }
 
+  const { data: username } = await supabase
+    .from('profiles')
+    .select('username')
+    .eq('username', parsedData.data.username);
+
+  if (username && username.length > 0) {
+    return {
+      errors: {
+        username: [`Someone (probably sow) already took this username :(`],
+      },
+    };
+  }
+
   const request = {
     email: parsedData.data.email,
     password: parsedData.data.password,
@@ -65,6 +79,7 @@ export async function signup(formData: FormData) {
 
   const { error } = await supabase.auth.signUp(request);
 
+  // todo: better error handling
   if (error) {
     redirect('/error');
   }

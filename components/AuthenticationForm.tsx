@@ -73,6 +73,7 @@ export function AuthenticationForm(props: PaperProps) {
               placeholder="Explodedcookie"
               value={form.values.username}
               onChange={(event) => form.setFieldValue('username', event.currentTarget.value)}
+              error={form.errors.username}
               radius="md"
             />
           )}
