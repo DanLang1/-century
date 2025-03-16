@@ -16,7 +16,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       <Stack gap="4">
         <Group gap="xs">
           <Group align="baseline" gap="xs">
-            <Text size="md" weight={500}>
+            <Text size="md" fw={500}>
               {message.user.username}
             </Text>
             <Text size="xs" c="dimmed">
