@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { IconNumber100Small } from '@tabler/icons-react';
-import { AppShell, Box, Burger, Group, Skeleton } from '@mantine/core';
+import { AppShell, Box, Burger, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle } from '@/components/ColorSchemeToggle/ColorSchemeToggle';
 

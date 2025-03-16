@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import {
   Button,
-  Checkbox,
   Group,
   Paper,
   PasswordInput,
@@ -17,15 +16,10 @@ import { useForm, zodResolver } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { changeEmail, confirmEmail, updatePassword } from '@/app/login/registerTempUser/actions';
 import { confirmEmailSchema, emailPasswordSignupSchema } from '@/lib/validation';
-import { UserInfo } from './chat/chat.interfaces';
 
-interface UpdateUserFormProps {
-  user: UserInfo;
-}
-export function UpdateUserForm({ user }: UpdateUserFormProps) {
+export function UpdateUserForm() {
   const [active, setActive] = useState(0);
   const nextStep = () => setActive((current) => (current < 3 ? current + 1 : current));
-  const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
   const [updateEmailFormValues, setUpdateEmailFormValues] = useState<
     typeof updateEmailForm.values | null
   >(null);
@@ -146,7 +140,7 @@ export function UpdateUserForm({ user }: UpdateUserFormProps) {
                   type="number"
                   key={confirmEmailForm.key('passcode')}
                   {...confirmEmailForm.getInputProps('passcode')}
-                  error={confirmEmailForm.errors.passcode ? true : false}
+                  error={!!confirmEmailForm.errors.passcode}
                 />
               </Stack>
 

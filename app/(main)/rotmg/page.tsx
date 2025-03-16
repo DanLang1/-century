@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Box, Flex } from '@mantine/core';
+import { Flex } from '@mantine/core';
 
 export default function Page() {
   return (

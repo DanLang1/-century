@@ -1,4 +1,4 @@
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { IconUser } from '@tabler/icons-react';
 import { Button, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';

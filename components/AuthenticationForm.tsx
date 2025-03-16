@@ -40,7 +40,7 @@ export function AuthenticationForm(props: PaperProps) {
     const formData = new FormData();
     formData.append('email', values.email);
     formData.append('password', values.password);
-    let result;
+
     if (type === 'register') {
       formData.append('username', values.username);
       formData.append('terms', values.terms.toString());
@@ -48,7 +48,7 @@ export function AuthenticationForm(props: PaperProps) {
       const { errors } = await signup(formData);
       form.setErrors(errors);
     } else if (type === 'login') {
-      result = await login(formData);
+      await login(formData);
     }
   };
 

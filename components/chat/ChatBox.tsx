@@ -37,7 +37,7 @@ export function ChatBox({ user }: ChatProps) {
   const { updateStatus } = usePresence('chat-demo', user);
   const { presenceData } = usePresenceListener('chat-demo');
 
-  const { channel, ably } = useChannel('chat-demo', (message) => {
+  const { channel } = useChannel('chat-demo', (message) => {
     setMessages((prevMessages) =>
       produce(prevMessages, (draft) => {
         if (draft.length > 200) {
@@ -103,7 +103,6 @@ export function ChatBox({ user }: ChatProps) {
 
   const handleSubmit = (values: Chat) => {
     if (!user) {
-      console.log('error no user');
       return;
     }
     if (user?.username === 'xatRando') {
@@ -113,7 +112,7 @@ export function ChatBox({ user }: ChatProps) {
     }
     const message: Message = {
       message: values.message,
-      user: user,
+      user,
       timestamp: new Date().toLocaleString(),
     };
     channel.publish({ name: 'chat-message', data: message });

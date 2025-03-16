@@ -52,7 +52,9 @@ export async function updateUser(formData: FormData, id?: string) {
     .select('*')
     .single();
   // 4. If there was an error, throw it
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
   if (!data) {
     throw new Error('No data returned from server');
   }

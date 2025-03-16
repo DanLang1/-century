@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import Ably from 'ably';
 import { createClient } from '@/utils/supabase/server';
 
@@ -10,7 +9,7 @@ export const revalidate = 0;
 export async function GET() {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getUser();
 
   // todo: probably don't need this otherwise can't let guests see chat
   // if (error || !data?.user) {

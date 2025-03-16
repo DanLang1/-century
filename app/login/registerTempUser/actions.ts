@@ -30,7 +30,7 @@ export async function changeEmail(formData: FormData) {
 
   if (error) {
     console.log(error);
-    return { error: error, message: 'An error occurred during signup' };
+    return { error, message: 'An error occurred during signup' };
   }
 }
 

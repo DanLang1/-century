@@ -1,7 +1,5 @@
-import { redirect } from 'next/navigation';
 import * as Ably from 'ably';
 import { AblyProvider, ChannelProvider } from 'ably/react';
-import { createClient } from '@/utils/supabase/server';
 import { UserInfo } from './chat.interfaces';
 import { ChatBox } from './ChatBox';
 
