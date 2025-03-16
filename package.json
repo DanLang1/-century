@@ -31,6 +31,7 @@
     "@supabase/supabase-js": "^2.49.1",
     "@tabler/icons-react": "^3.27.1",
     "ably": "^2.6.3",
+    "ci": "^2.3.0",
     "immer": "^10.1.1",
     "mantine-form-zod-resolver": "^1.1.0",
     "next": "15.1.0",
