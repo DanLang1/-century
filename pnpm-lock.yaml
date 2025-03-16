@@ -44,6 +44,9 @@ importers:
       ci:
         specifier: ^2.3.0
         version: 2.3.0
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       immer:
         specifier: ^10.1.1
         version: 10.1.1
