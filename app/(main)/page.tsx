@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { UserInfo } from '@/components/chat/chat.interfaces';
 import { ChatContainer } from '@/components/chat/ChatContainer';
 import { Welcome } from '@/components/Welcome/Welcome';
@@ -31,11 +32,19 @@ export default async function HomePage() {
     }
   }
 
+  const { data: messagesData, error } = await supabase
+    .from('messages')
+    .select(`id, timestamp, message, profiles(username, avatar, id)`);
+
+  if (error) {
+    redirect('/error');
+  }
+
   return (
     <>
       <Welcome />
 
-      <ChatContainer user={currUser} />
+      <ChatContainer user={currUser} messages={messagesData ?? []} />
     </>
   );
 }

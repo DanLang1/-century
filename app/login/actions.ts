@@ -52,15 +52,17 @@ export async function signup(formData: FormData) {
     return { errors: fieldErrors, message: 'Validation failed' };
   }
 
+  // check if username already exists
   const { data: username } = await supabase
     .from('profiles')
-    .select('username')
+    .select('username, is_anon')
+    .eq('is_anon', false)
     .eq('username', parsedData.data.username);
 
   if (username && username.length > 0) {
     return {
       errors: {
-        username: [`Someone (probably sow) already took this username :(`],
+        username: [`A permanent user (probably sow) already took this username :(`],
       },
     };
   }

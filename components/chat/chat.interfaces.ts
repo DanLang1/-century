@@ -2,12 +2,6 @@ export interface Chat {
   message: string;
 }
 
-export interface Message {
-  message: string;
-  user: UserInfo;
-  timestamp: string;
-}
-
 export interface UserForm {
   username: string;
   avatar: string;
@@ -18,4 +12,15 @@ export interface UserInfo {
   avatar: string;
   id: string;
   anonymous?: boolean;
+}
+
+export interface Message {
+  id: number | string;
+  timestamp: string;
+  message: string | null;
+  profiles: {
+    avatar: string;
+    username: string;
+    id: string;
+  };
 }

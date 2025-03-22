@@ -14,9 +14,10 @@ import {
   Stack,
   TextInput,
 } from '@mantine/core';
-import { isNotEmpty, useForm } from '@mantine/form';
+import { useForm, zodResolver } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
-import { createAnonymousUser, updateUser } from '@/app/(main)/actions';
+import { createAnonymousUser, revalidateMain, sendMessage, updateUser } from '@/app/(main)/actions';
+import { chatMessageSchema } from '@/lib/validation';
 import { ActiveAvatarDisplay } from './ActiveAvatarDisplay';
 import { ActiveUserDisplay } from './ActiveUserDisplay';
 import { Chat, Message, UserForm, UserInfo } from './chat.interfaces';
@@ -25,10 +26,11 @@ import { UserSelectModal } from './UserSelectModal';
 
 interface ChatProps {
   user: UserInfo;
+  existingMessages: Message[];
 }
 
-export function ChatBox({ user }: ChatProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+export function ChatBox({ user, existingMessages }: ChatProps) {
+  const [messages, setMessages] = useState<Message[]>(existingMessages);
   const [pendingMessage, setPendingMessage] = useState<string>('');
 
   const [opened, { toggle }] = useDisclosure();
@@ -53,6 +55,7 @@ export function ChatBox({ user }: ChatProps) {
       username: presData.data?.username,
       avatar: presData.data?.avatar,
       id: presData.clientId,
+      anonymous: presData.data?.anonymous,
     };
   });
 
@@ -67,17 +70,15 @@ export function ChatBox({ user }: ChatProps) {
     initialValues: {
       message: '',
     },
-    validate: {
-      message: isNotEmpty(),
-    },
+    validate: zodResolver(chatMessageSchema),
   });
 
   const userForm = useForm<UserForm>({
     mode: 'uncontrolled',
     validateInputOnChange: true,
     initialValues: {
-      username: '',
-      avatar: '',
+      username: user.username === 'xatRando' ? '' : user.username,
+      avatar: user.avatar,
     },
     validate: {
       username: (value) => {
@@ -101,7 +102,7 @@ export function ChatBox({ user }: ChatProps) {
     ref.current?.focus();
   }, [messages]);
 
-  const handleSubmit = (values: Chat) => {
+  const handleSubmit = async (values: Chat) => {
     if (!user) {
       return;
     }
@@ -110,13 +111,23 @@ export function ChatBox({ user }: ChatProps) {
       setPendingMessage(values.message);
       return;
     }
-    const message: Message = {
+
+    // pub message immediately, then save
+    const tempMessage: Message = {
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
       message: values.message,
-      user,
-      timestamp: new Date().toLocaleString(),
+      profiles: {
+        username: user.username,
+        avatar: user.avatar,
+        id: user.id,
+      },
     };
-    channel.publish({ name: 'chat-message', data: message });
+
+    channel.publish({ name: 'chat-message', data: tempMessage });
     form.reset();
+    // if saving message fails, hopefully it wasn't important
+    await sendMessage(user.id, values.message);
   };
 
   const send = () => {
@@ -128,20 +139,6 @@ export function ChatBox({ user }: ChatProps) {
   };
 
   const handleUserSetForm = async (values: UserForm) => {
-    const userInfo: UserInfo = {
-      username: values.username,
-      avatar: values.avatar,
-      id: user?.id,
-    };
-    if (pendingMessage !== '') {
-      const message: Message = {
-        message: pendingMessage,
-        user: userInfo,
-        timestamp: new Date().toISOString(),
-      };
-      channel.publish({ name: 'chat-message', data: message });
-    }
-
     const formData = new FormData();
     formData.append('username', values.username);
     formData.append('avatar', values.avatar);
@@ -168,11 +165,16 @@ export function ChatBox({ user }: ChatProps) {
       }
       userInfoFromDb = result?.user ?? userInfoFromDb;
     }
+    if (pendingMessage !== '') {
+      const result = await sendMessage(userInfoFromDb.id, pendingMessage);
+      channel.publish({ name: 'chat-message', data: result.data });
+    }
 
     updateStatus(userInfoFromDb);
     setPendingMessage('');
     form.reset();
     toggleModal();
+    revalidateMain();
   };
 
   return (
@@ -202,8 +204,8 @@ export function ChatBox({ user }: ChatProps) {
               </Group>
               <Stack>
                 <ScrollArea h="50vh" type="always" viewportRef={viewport} p="0">
-                  {messages.map((message, index) => (
-                    <ChatMessage key={index} message={message} />
+                  {messages.map((message) => (
+                    <ChatMessage key={message.id} message={message} users={currUsers} />
                   ))}
                 </ScrollArea>
                 <TextInput

@@ -38,3 +38,7 @@ export const emailSchema = z.object({
 export const passwordSchema = z.object({
   password: z.string().min(6, { message: 'Password should include at least 6 characters' }),
 });
+
+export const chatMessageSchema = z.object({
+  message: z.string().max(500, { message: 'Azx please break this up into 2 messages' }),
+});

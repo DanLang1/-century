@@ -45,14 +45,18 @@ export function ActiveUserDisplay({
             {user.id === currUserId ? (
               <UnstyledButton onClick={onClickMobile}>
                 <Group align="center" gap="sm">
-                  <Avatar radius="xl" size="sm" src={user.avatar} />
-                  <Text>{user.username}</Text>
+                  <Avatar radius="xl" size="md" src={user.avatar} />
+                  <Text size="md" c={!(user.anonymous ?? true) ? 'blue' : '#089712'}>
+                    {user.username}
+                  </Text>
                 </Group>
               </UnstyledButton>
             ) : (
               <Group align="center" gap="sm">
-                <Avatar radius="xl" size="sm" src={user.avatar} />
-                <Text>{user.username}</Text>
+                <Avatar radius="xl" size="md" src={user.avatar} />
+                <Text size="md" c={!(user.anonymous ?? true) ? 'blue' : '#089712'}>
+                  {user.username}
+                </Text>
               </Group>
             )}
           </Stack>
@@ -67,14 +71,18 @@ export function ActiveUserDisplay({
               user.id === currUserId ? (
                 <UnstyledButton key={index} onClick={openUserModal}>
                   <Group align="center">
-                    <Avatar radius="xl" size="sm" src={user.avatar} />
-                    <Text>{user.username}</Text>
+                    <Avatar radius="xl" size="md" src={user.avatar} />
+                    <Text size="md" c={!(user.anonymous ?? true) ? 'blue' : '#089712'}>
+                      {user.username}
+                    </Text>
                   </Group>
                 </UnstyledButton>
               ) : (
                 <Group key={index} align="center">
-                  <Avatar radius="xl" size="sm" src={user.avatar} />
-                  <Text>{user.username}</Text>
+                  <Avatar radius="xl" size="md" src={user.avatar} />
+                  <Text size="md" c={!(user.anonymous ?? true) ? 'blue' : '#089712'}>
+                    {user.username}
+                  </Text>
                 </Group>
               )
             )}

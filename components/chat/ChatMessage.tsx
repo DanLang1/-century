@@ -1,23 +1,25 @@
 import { Avatar, Group, Paper, Stack, Text } from '@mantine/core';
-import { Message } from './chat.interfaces';
+import { Message, UserInfo } from './chat.interfaces';
 
 interface ChatMessageProps {
   message: Message;
+  users: UserInfo[];
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, users }: ChatMessageProps) {
   // timestamp is in UTC for standardization, convert to users local timezone so it shows correctly for them.
   const userTimeStamp = new Date(message.timestamp).toLocaleString();
+  const matchingUser = users.find((user) => user.id === message.profiles.id);
   return (
     <Group align="flex-start" my="xs" wrap="nowrap" gap="xs">
       <Stack>
-        <Avatar size="md" src={message.user.avatar} mt="4" />
+        <Avatar size="md" src={matchingUser?.avatar ?? message.profiles.avatar} mt="4" />
       </Stack>
       <Stack gap="4">
         <Group gap="xs">
           <Group align="baseline" gap="xs">
             <Text size="md" fw={500}>
-              {message.user.username}
+              {matchingUser?.username ?? message.profiles.username}
             </Text>
             <Text size="xs" c="dimmed">
               {userTimeStamp}

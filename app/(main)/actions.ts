@@ -30,16 +30,18 @@ export async function updateUser(formData: FormData, id?: string) {
   };
 
   // check if username already exists on accounts not it's own id
+  // check if username already exists
   const { data: username } = await supabase
     .from('profiles')
-    .select('username,id')
+    .select('username,is_anon,id')
+    .eq('is_anon', false)
     .eq('username', parsedData.data.username)
     .neq('id', id);
 
   if (username && username.length > 0) {
     return {
       errors: {
-        username: [`Someone (probably sow) already took this username :(`],
+        username: [`A permanent user (probably sow) already took this username :(`],
       },
     };
   }
@@ -58,8 +60,6 @@ export async function updateUser(formData: FormData, id?: string) {
   if (!data) {
     throw new Error('No data returned from server');
   }
-
-  revalidatePath('/');
 
   return { data };
 }
@@ -81,13 +81,14 @@ export async function createAnonymousUser(formData: FormData) {
   // check if username already exists
   const { data: username } = await supabase
     .from('profiles')
-    .select('username')
+    .select('username, is_anon')
+    .eq('is_anon', false)
     .eq('username', parsedData.data.username);
 
   if (username && username.length > 0) {
     return {
       errors: {
-        username: [`Someone (probably sow) already took this username :(`],
+        username: [`A permanent user (probably sow) already took this username :(`],
       },
     };
   }
@@ -117,7 +118,34 @@ export async function createAnonymousUser(formData: FormData) {
     user = userInfo?.[0];
   }
 
-  revalidatePath('/');
-
   return { user };
+}
+
+export async function revalidateMain() {
+  revalidatePath('/');
+}
+
+export async function sendMessage(id: string, message: string) {
+  const supabase = await createClient();
+
+  const body = {
+    user_id: id,
+    message,
+  };
+
+  // 3. Call the Supabase client and get the response
+  const { data, error } = await supabase
+    .from('messages')
+    .insert(body)
+    .select(`id,timestamp, message, profiles(username, avatar)`)
+    .single();
+  // 4. If there was an error, throw it
+  if (error) {
+    throw error;
+  }
+  if (!data) {
+    throw new Error('No data returned from server');
+  }
+
+  return { data };
 }

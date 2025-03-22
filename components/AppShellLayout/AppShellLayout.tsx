@@ -24,6 +24,7 @@ export function AppShellLayout({ children }: AppShellLayoutProps) {
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             <IconNumber100Small size={48} />
             <ColorSchemeToggle />
+            {/* <ProfileToggle /> */}
           </Group>
         </AppShell.Header>
         <AppShell.Navbar p="md">
