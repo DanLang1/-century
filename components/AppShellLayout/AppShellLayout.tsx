@@ -24,7 +24,7 @@ export function AppShellLayout({ children, user }: AppShellLayoutProps) {
         padding="md"
       >
         <AppShell.Header>
-          <Group h="100%" px="md">
+          <Group h="100%" px="sm">
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             <IconNumber100Small size={48} />
             <ColorSchemeToggle />
@@ -47,7 +47,12 @@ export function AppShellLayout({ children, user }: AppShellLayoutProps) {
                   </Button>
                 </Link>
                 <Link href="/login?type=register">
-                  <Button variant="default" size="md" className={classes.loginBorder}>
+                  <Button
+                    variant="default"
+                    size="md"
+                    visibleFrom="sm"
+                    className={classes.loginBorder}
+                  >
                     Signup
                   </Button>
                 </Link>
