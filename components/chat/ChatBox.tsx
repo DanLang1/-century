@@ -171,8 +171,18 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
       }
       userInfoFromDb = result?.user ?? userInfoFromDb;
       if (pendingMessage !== '') {
-        const result = await sendMessage(userInfoFromDb.id, pendingMessage);
-        channel.publish({ name: 'chat-message', data: result.data });
+        const tempMessage: Message = {
+          id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
+          message: pendingMessage,
+          profiles: {
+            username: userInfoFromDb.username,
+            avatar: userInfoFromDb.avatar,
+            id: userInfoFromDb.id,
+          },
+        };
+        channel.publish({ name: 'chat-message', data: tempMessage });
+        await sendMessage(userInfoFromDb.id, pendingMessage);
       }
       const messages = await getMessages();
       setMessages(messages.data);

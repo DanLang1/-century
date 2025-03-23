@@ -104,6 +104,7 @@ export async function createAnonymousUser(formData: FormData) {
   });
 
   if (error) {
+    console.error(error);
     redirect('/error');
   }
 
@@ -134,17 +135,12 @@ export async function sendMessage(id: string, message: string) {
   };
 
   // 3. Call the Supabase client and get the response
-  const { data, error } = await supabase.from('messages').insert(body);
+  const { error } = await supabase.from('messages').insert(body);
   // 4. If there was an error, throw it
   if (error) {
     console.error(error);
     redirect('/error');
   }
-  if (!data) {
-    redirect('/error');
-  }
-
-  return { data };
 }
 
 export async function getMessages() {
