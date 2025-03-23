@@ -13,9 +13,10 @@ import {
   ScrollArea,
   Stack,
   TextInput,
+  useMantineTheme,
 } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import {
   createAnonymousUser,
   getMessages,
@@ -36,6 +37,8 @@ interface ChatProps {
 }
 
 export function ChatBox({ user, existingMessages }: ChatProps) {
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [messages, setMessages] = useState<Message[]>(existingMessages);
   const [pendingMessage, setPendingMessage] = useState<string>('');
 
@@ -195,6 +198,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
     revalidateMain();
   };
 
+  // TODO: More elegant way to handle the VH for chat area. Very hacky rn
   return (
     <Center pt={{ base: 'sm', md: 'xl' }}>
       <form id="userForm" onSubmit={userForm.onSubmit((values) => handleUserSetForm(values))}>
@@ -208,9 +212,10 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
 
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
         <Paper
-          w={{ base: '90vw', sm: '50vw', md: '60vw', lg: '50vw' }}
+          w={{ base: '100vw', sm: '50vw', md: '60vw', lg: '50vw' }}
           shadow="md"
           bd="md"
+          radius={isMobile ? 'xs' : 'md'}
           p="sm"
           bg="var(--mantine-color-blue-light)"
         >
@@ -221,7 +226,16 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
                 <ActiveAvatarDisplay users={currUsers} openDrawer={toggle} />
               </Group>
               <Stack>
-                <ScrollArea h="50vh" type="always" viewportRef={viewport} p="0">
+                <ScrollArea
+                  h={
+                    isMobile
+                      ? `calc(100vh - var(--app-shell-header-height) - var(--app-shell-padding) - 14em)`
+                      : '50vh'
+                  }
+                  type="always"
+                  viewportRef={viewport}
+                  p="0"
+                >
                   {messages.map((message) => (
                     <ChatMessage key={message.id} message={message} users={currUsers} />
                   ))}

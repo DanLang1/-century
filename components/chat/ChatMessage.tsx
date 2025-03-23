@@ -1,4 +1,4 @@
-import { Avatar, Group, Paper, Stack, Text } from '@mantine/core';
+import { Avatar, Group, Indicator, Paper, Stack, Text } from '@mantine/core';
 import { Message, UserInfo } from './chat.interfaces';
 
 interface ChatMessageProps {
@@ -13,7 +13,14 @@ export function ChatMessage({ message, users }: ChatMessageProps) {
   return (
     <Group align="flex-start" my="xs" wrap="nowrap" gap="xs">
       <Stack>
-        <Avatar size="md" src={matchingUser?.avatar ?? message.profiles.avatar} mt="4" />
+        <Indicator
+          color={matchingUser ? 'green' : 'gray'}
+          position="bottom-end"
+          offset={3}
+          withBorder
+        >
+          <Avatar size="md" src={matchingUser?.avatar ?? message.profiles.avatar} mt="4" />
+        </Indicator>
       </Stack>
       <Stack gap="4">
         <Group gap="xs">

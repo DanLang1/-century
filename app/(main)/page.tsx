@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { Flex } from '@mantine/core';
 import { UserInfo } from '@/components/chat/chat.interfaces';
 import { ChatContainer } from '@/components/chat/ChatContainer';
 import { Welcome } from '@/components/Welcome/Welcome';
@@ -43,10 +44,13 @@ export default async function HomePage() {
   }
 
   return (
-    <>
+    <Flex
+      direction="column"
+      h="calc(100vh - var(--app-shell-header-height) - var(--app-shell-padding))"
+    >
       <Welcome />
 
       <ChatContainer user={currUser} messages={messagesData ?? []} />
-    </>
+    </Flex>
   );
 }

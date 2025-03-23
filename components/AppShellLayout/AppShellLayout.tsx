@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
 import { IconNumber100Small } from '@tabler/icons-react';
-import { AppShell, Box, Burger, Button, Group } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { AppShell, Burger, Button, Group, useMantineTheme } from '@mantine/core';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { ColorSchemeToggle } from '@/components/ColorSchemeToggle/ColorSchemeToggle';
 import { ProfileToggle } from './ProfileToggle';
 import classes from './AppShellLayout.module.css';
@@ -15,13 +15,15 @@ interface AppShellLayoutProps {
 }
 
 export function AppShellLayout({ children, user }: AppShellLayoutProps) {
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [opened, { toggle }] = useDisclosure();
   return (
     <>
       <AppShell
         header={{ height: 60 }}
         navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
-        padding="md"
+        padding={{ base: 'sm', sm: 'sm', lg: 'xl' }} // Top and bottom padding
       >
         <AppShell.Header>
           <Group h="100%" px="sm">
@@ -68,8 +70,12 @@ export function AppShellLayout({ children, user }: AppShellLayoutProps) {
           <Link href="/pr2">PR2</Link>
           <Link href="/mt">Minethings</Link>
         </AppShell.Navbar>
-        <AppShell.Main>
-          <Box>{children}</Box>
+        <AppShell.Main
+          pl={isMobile ? 0 : undefined}
+          pr={isMobile ? 0 : undefined}
+          pb={isMobile ? 0 : undefined}
+        >
+          {children}
         </AppShell.Main>
       </AppShell>
     </>
