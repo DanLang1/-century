@@ -1,16 +1,20 @@
 'use client';
 
 import Link from 'next/link';
+import { User } from '@supabase/supabase-js';
 import { IconNumber100Small } from '@tabler/icons-react';
-import { AppShell, Box, Burger, Group } from '@mantine/core';
+import { AppShell, Box, Burger, Button, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle } from '@/components/ColorSchemeToggle/ColorSchemeToggle';
+import { ProfileToggle } from './ProfileToggle';
+import classes from './AppShellLayout.module.css';
 
 interface AppShellLayoutProps {
   children?: React.ReactNode;
+  user: User | null;
 }
 
-export function AppShellLayout({ children }: AppShellLayoutProps) {
+export function AppShellLayout({ children, user }: AppShellLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
   return (
     <>
@@ -24,6 +28,32 @@ export function AppShellLayout({ children }: AppShellLayoutProps) {
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             <IconNumber100Small size={48} />
             <ColorSchemeToggle />
+
+            {user ? (
+              user.is_anonymous ? (
+                <Link href="/login/registerTempUser">
+                  <Button variant="transparent" size="md">
+                    Create Perm Account
+                  </Button>
+                </Link>
+              ) : (
+                <ProfileToggle />
+              )
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="transparent" size="md" className={classes.login}>
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/login?type=register">
+                  <Button variant="default" size="md" className={classes.loginBorder}>
+                    Signup
+                  </Button>
+                </Link>
+              </>
+            )}
+
             {/* <ProfileToggle /> */}
           </Group>
         </AppShell.Header>

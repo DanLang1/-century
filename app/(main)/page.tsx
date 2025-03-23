@@ -34,7 +34,9 @@ export default async function HomePage() {
 
   const { data: messagesData, error } = await supabase
     .from('messages')
-    .select(`id, timestamp, message, profiles(username, avatar, id)`);
+    .select(`id, timestamp, message, profiles(username, avatar, id)`)
+    .order('timestamp')
+    .limit(200);
 
   if (error) {
     redirect('/error');

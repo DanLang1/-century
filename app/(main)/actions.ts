@@ -134,17 +134,35 @@ export async function sendMessage(id: string, message: string) {
   };
 
   // 3. Call the Supabase client and get the response
-  const { data, error } = await supabase
-    .from('messages')
-    .insert(body)
-    .select(`id,timestamp, message, profiles(username, avatar)`)
-    .single();
+  const { data, error } = await supabase.from('messages').insert(body);
   // 4. If there was an error, throw it
   if (error) {
-    throw error;
+    console.error(error);
+    redirect('/error');
   }
   if (!data) {
-    throw new Error('No data returned from server');
+    redirect('/error');
+  }
+
+  return { data };
+}
+
+export async function getMessages() {
+  const supabase = await createClient();
+
+  // 3. Call the Supabase client and get the response
+  const { data, error } = await supabase
+    .from('messages')
+    .select(`id,timestamp, message, profiles(id, username, avatar)`)
+    .order('timestamp')
+    .limit(200);
+  // 4. If there was an error, throw it
+  if (error) {
+    console.error(error);
+    redirect('/error');
+  }
+  if (!data) {
+    redirect('/error');
   }
 
   return { data };

@@ -16,7 +16,13 @@ import {
 } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
-import { createAnonymousUser, revalidateMain, sendMessage, updateUser } from '@/app/(main)/actions';
+import {
+  createAnonymousUser,
+  getMessages,
+  revalidateMain,
+  sendMessage,
+  updateUser,
+} from '@/app/(main)/actions';
 import { chatMessageSchema } from '@/lib/validation';
 import { ActiveAvatarDisplay } from './ActiveAvatarDisplay';
 import { ActiveUserDisplay } from './ActiveUserDisplay';
@@ -164,10 +170,12 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
         return;
       }
       userInfoFromDb = result?.user ?? userInfoFromDb;
-    }
-    if (pendingMessage !== '') {
-      const result = await sendMessage(userInfoFromDb.id, pendingMessage);
-      channel.publish({ name: 'chat-message', data: result.data });
+      if (pendingMessage !== '') {
+        const result = await sendMessage(userInfoFromDb.id, pendingMessage);
+        channel.publish({ name: 'chat-message', data: result.data });
+      }
+      const messages = await getMessages();
+      setMessages(messages.data);
     }
 
     updateStatus(userInfoFromDb);

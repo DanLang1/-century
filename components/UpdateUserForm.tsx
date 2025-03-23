@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import {
   Button,
+  Checkbox,
   Group,
   Paper,
   PasswordInput,
@@ -27,6 +28,7 @@ export function UpdateUserForm() {
     initialValues: {
       email: '',
       password: '',
+      terms: true,
     },
 
     validate: zodResolver(emailPasswordSignupSchema),
@@ -112,6 +114,13 @@ export function UpdateUserForm() {
                     'Password should include at least 6 characters'
                   }
                   radius="md"
+                />
+                <Checkbox
+                  label="I agree to retire to a mango farm with Rudston by 2050"
+                  checked={updateEmailForm.values.terms}
+                  onChange={(event) =>
+                    updateEmailForm.setFieldValue('terms', event.currentTarget.checked)
+                  }
                 />
               </Stack>
 

@@ -1,7 +1,7 @@
 import '@mantine/core/styles.css';
 
-import { AppShellLayout } from '@/components/AppShellLayout/AppShellLayout';
+import ProfileToggleContainer from '@/components/AppShellLayout/ProfileToggleContainer';
 
 export default function MainLayout({ children }: { children: any }) {
-  return <AppShellLayout>{children}</AppShellLayout>;
+  return <ProfileToggleContainer>{children}</ProfileToggleContainer>;
 }

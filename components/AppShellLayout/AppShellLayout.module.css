@@ -1,0 +1,8 @@
+.login {
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+}
+
+.loginBorder {
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  border-color: #424242;
+}
