@@ -229,7 +229,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
                 <ScrollArea
                   h={
                     isMobile
-                      ? `calc(100vh - var(--app-shell-header-height) - var(--app-shell-padding) - 15em)`
+                      ? `calc(100vh - var(--app-shell-header-height) - var(--app-shell-padding) - 15.5em)`
                       : '50vh'
                   }
                   type="always"
