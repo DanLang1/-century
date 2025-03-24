@@ -35,7 +35,7 @@ export function AppShellLayout({ children, user }: AppShellLayoutProps) {
               user.is_anonymous ? (
                 <Link href="/login/registerTempUser">
                   <Button variant="transparent" size="md">
-                    Create Perm Account
+                    Perm Account?
                   </Button>
                 </Link>
               ) : (
