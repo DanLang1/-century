@@ -26,7 +26,7 @@ export function AppShellLayout({ children, user }: AppShellLayoutProps) {
         padding={{ base: 'sm', sm: 'sm', lg: 'xl' }} // Top and bottom padding
       >
         <AppShell.Header>
-          <Group h="100%" px="sm">
+          <Group h="100%" px={isMobile ? 'xs' : 'sm'} wrap="nowrap">
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             <IconNumber100Small size={48} />
             <ColorSchemeToggle />
