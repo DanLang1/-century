@@ -64,7 +64,7 @@ export function AppShellLayout({ children, user }: AppShellLayoutProps) {
             {/* <ProfileToggle /> */}
           </Group>
         </AppShell.Header>
-        <AppShell.Navbar p="md">
+        <AppShell.Navbar p="md" zIndex={201}>
           <Link href="/"> Home</Link>
           <Link href="/rotmg">ROTMG </Link>
           <Link href="/pr2">PR2</Link>
