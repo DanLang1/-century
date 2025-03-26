@@ -81,7 +81,7 @@ export function UpdateUserForm() {
   return (
     <>
       <Stepper active={active} onStepClick={setActive}>
-        <Stepper.Step label="First step" description="Setup Email" allowStepSelect>
+        <Stepper.Step label="First step" description="Setup Email" allowStepSelect={false}>
           <Paper radius="md" p="xl" withBorder>
             <Text size="lg" fw={500} pb="md">
               Join the team of the Century!
@@ -135,7 +135,7 @@ export function UpdateUserForm() {
             </form>
           </Paper>
         </Stepper.Step>
-        <Stepper.Step label="Second step" description="Verify email" allowStepSelect>
+        <Stepper.Step label="Second step" description="Verify email" allowStepSelect={false}>
           <Card radius="md" p="xl" withBorder>
             <Card.Section>
               <Image src="/jaden.png" height={160} alt="Norway" />
