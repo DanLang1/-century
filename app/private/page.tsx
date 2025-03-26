@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { Center } from '@mantine/core';
 import { createClient } from '@/utils/supabase/server';
 
 export default async function PrivatePage() {
@@ -9,5 +10,9 @@ export default async function PrivatePage() {
     redirect('/login');
   }
 
-  return <p>Hello {data.user.email}</p>;
+  return (
+    <Center>
+      <p>Hello {data.user.email}</p>
+    </Center>
+  );
 }

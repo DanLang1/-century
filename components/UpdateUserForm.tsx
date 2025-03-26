@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import {
   Button,
+  Card,
+  Center,
   Checkbox,
   Group,
+  Image,
   Paper,
   PasswordInput,
   PinInput,
@@ -78,7 +81,7 @@ export function UpdateUserForm() {
   return (
     <>
       <Stepper active={active} onStepClick={setActive}>
-        <Stepper.Step label="First step" description="Setup Email" allowStepSelect={false}>
+        <Stepper.Step label="First step" description="Setup Email" allowStepSelect>
           <Paper radius="md" p="xl" withBorder>
             <Text size="lg" fw={500} pb="md">
               Join the team of the Century!
@@ -132,12 +135,14 @@ export function UpdateUserForm() {
             </form>
           </Paper>
         </Stepper.Step>
-        <Stepper.Step label="Second step" description="Verify email" allowStepSelect={false}>
-          <Paper radius="md" p="xl" withBorder>
-            <Text size="lg" fw={500} pb="md">
+        <Stepper.Step label="Second step" description="Verify email" allowStepSelect>
+          <Card radius="md" p="xl" withBorder>
+            <Card.Section>
+              <Image src="/jaden.png" height={160} alt="Norway" />
+            </Card.Section>
+            <Text size="lg" fw={500} pb="md" pt="md">
               Enter 6 digit code sent to your email
             </Text>
-
             <form
               onSubmit={confirmEmailForm.onSubmit((values) => {
                 handleConfirmEmail(values);
@@ -159,7 +164,7 @@ export function UpdateUserForm() {
                 </Button>
               </Group>
             </form>
-          </Paper>
+          </Card>
         </Stepper.Step>
       </Stepper>
     </>

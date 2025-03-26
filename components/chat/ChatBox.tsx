@@ -16,7 +16,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
-import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { useDebouncedCallback, useDisclosure, useMediaQuery } from '@mantine/hooks';
 import {
   createAnonymousUser,
   getMessages,
@@ -28,7 +28,9 @@ import { chatMessageSchema } from '@/lib/validation';
 import { ActiveAvatarDisplay } from './ActiveAvatarDisplay';
 import { ActiveUserDisplay } from './ActiveUserDisplay';
 import { Chat, Message, UserForm, UserInfo } from './chat.interfaces';
+import { MessageType } from './ChatConstants';
 import { ChatMessage } from './ChatMessage';
+import { TypingIndicator } from './TypingIndicator';
 import { UserSelectModal } from './UserSelectModal';
 
 interface ChatProps {
@@ -41,6 +43,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [messages, setMessages] = useState<Message[]>(existingMessages);
   const [pendingMessage, setPendingMessage] = useState<string>('');
+  const [usersTyping, setUsersTyping] = useState<string[]>([]);
 
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
@@ -49,14 +52,34 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
   const { presenceData } = usePresenceListener('chat-demo');
 
   const { channel } = useChannel('chat-demo', (message) => {
-    setMessages((prevMessages) =>
-      produce(prevMessages, (draft) => {
-        if (draft.length > 200) {
-          draft.shift();
-        }
-        draft.push(message.data);
-      })
-    );
+    if (message.name === MessageType.ChatMessage) {
+      setMessages((prevMessages) =>
+        produce(prevMessages, (draft) => {
+          if (draft.length > 200) {
+            draft.shift();
+          }
+          draft.push(message.data);
+        })
+      );
+    } else if (message.name === MessageType.TypingEvent) {
+      setUsersTyping((prevUsers) =>
+        produce(prevUsers, (draft) => {
+          if (!draft.includes(message.data)) {
+            draft.push(message.data); // Add user if not already typing
+          }
+        })
+      );
+      setTimeout(() => {
+        setUsersTyping((prevUsers) =>
+          produce(prevUsers, (draft) => {
+            const index = draft.indexOf(message.data);
+            if (index !== -1) {
+              draft.splice(index, 1); // Remove user from typing list
+            }
+          })
+        );
+      }, 3000);
+    }
   });
 
   const currUsers: UserInfo[] = presenceData.map((presData) => {
@@ -75,7 +98,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
     viewport.current!.scrollTo({ top: viewport.current!.scrollHeight, behavior: 'smooth' });
 
   const form = useForm<Chat>({
-    mode: 'uncontrolled',
+    mode: 'controlled',
     initialValues: {
       message: '',
     },
@@ -133,7 +156,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
       },
     };
 
-    channel.publish({ name: 'chat-message', data: tempMessage });
+    channel.publish({ name: MessageType.ChatMessage, data: tempMessage });
     form.reset();
     // if saving message fails, hopefully it wasn't important
     await sendMessage(user.id, values.message);
@@ -184,7 +207,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
             id: userInfoFromDb.id,
           },
         };
-        channel.publish({ name: 'chat-message', data: tempMessage });
+        channel.publish({ name: MessageType.ChatMessage, data: tempMessage });
         await sendMessage(userInfoFromDb.id, pendingMessage);
       }
       const messages = await getMessages();
@@ -197,6 +220,10 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
     toggleModal();
     revalidateMain();
   };
+
+  const handleTyping = useDebouncedCallback(() => {
+    channel.publish(MessageType.TypingEvent, user.username);
+  }, 500);
 
   // TODO: More elegant way to handle the VH for chat area. Very hacky rn
   return (
@@ -212,7 +239,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
 
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
         <Paper
-          w={{ base: '100vw', sm: '50vw', md: '60vw', lg: '50vw' }}
+          w={{ base: '100vw', sm: '50vw', md: '60vw', lg: '70vw' }}
           shadow="md"
           bd="md"
           radius={isMobile ? 'xs' : 'md'}
@@ -225,11 +252,12 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
               <Group pb="sm" justify="flex-end" hiddenFrom="sm">
                 <ActiveAvatarDisplay users={currUsers} openDrawer={toggle} />
               </Group>
-              <Stack>
+              <Stack gap="2px">
                 <ScrollArea
+                  scrollbars="y"
                   h={
                     isMobile
-                      ? `calc(100vh - var(--app-shell-header-height) - var(--app-shell-padding) - 15.5em)`
+                      ? `calc(100vh - var(--app-shell-header-height) - var(--app-shell-padding) - 15em)`
                       : '50vh'
                   }
                   type="always"
@@ -240,11 +268,18 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
                     <ChatMessage key={message.id} message={message} users={currUsers} />
                   ))}
                 </ScrollArea>
+
+                <TypingIndicator usersTyping={usersTyping} />
+
                 <TextInput
                   pt="sm"
                   placeholder="chat"
-                  key={form.key('message')}
                   {...form.getInputProps('message')}
+                  key={form.key('message')}
+                  onChange={(event) => {
+                    form.setFieldValue('message', event.target.value);
+                    handleTyping();
+                  }}
                   ref={ref}
                   rightSection={send()}
                 />
