@@ -4,7 +4,6 @@ import { useState } from 'react';
 import {
   Button,
   Card,
-  Center,
   Checkbox,
   Group,
   Image,
