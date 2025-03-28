@@ -1,25 +1,25 @@
-import { Box, Group, Text } from '@mantine/core';
-import classes from './Chat.module.css';
+import { Avatar, Box, Group, Loader, Tooltip } from '@mantine/core';
+import { UserInfo } from './chat.interfaces';
+import { TypingIndicatorDots } from './TypingIndicatorDots';
 
 interface TypingIndicatorProps {
-  usersTyping: string[];
+  usersTyping: UserInfo[];
 }
 
 export function TypingIndicator({ usersTyping }: TypingIndicatorProps) {
   return (
-    <Box h="1em">
+    <Box h="1em" mb="md">
       {usersTyping.length > 0 && (
-        <Group gap="2px" mb="xl" align="center">
-          <Text c="dimmed" size="sm">
-            {`${usersTyping.join(', ')} is typing`}
-          </Text>
-          <span className={classes.dots}>
-            {[0, 1, 2].map((i) => (
-              <span key={i} className={classes.dot}>
-                .
-              </span>
+        <Group gap="2px" align="center">
+          <Avatar.Group>
+            {usersTyping.map((user) => (
+              <Tooltip key={user.id} label={user.username} withArrow>
+                <Avatar radius="xl" size="md" src={user.avatar} />
+              </Tooltip>
             ))}
-          </span>
+          </Avatar.Group>
+
+          <Loader loaders={{ ...Loader.defaultLoaders, ring: TypingIndicatorDots }} type="ring" />
         </Group>
       )}
     </Box>

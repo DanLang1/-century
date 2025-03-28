@@ -43,7 +43,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [messages, setMessages] = useState<Message[]>(existingMessages);
   const [pendingMessage, setPendingMessage] = useState<string>('');
-  const [usersTyping, setUsersTyping] = useState<string[]>([]);
+  const [usersTyping, setUsersTyping] = useState<UserInfo[]>([]);
 
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
@@ -62,23 +62,32 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
         })
       );
     } else if (message.name === MessageType.TypingEvent) {
+      // Update the typing users list
       setUsersTyping((prevUsers) =>
         produce(prevUsers, (draft) => {
-          if (!draft.includes(message.data)) {
-            draft.push(message.data); // Add user if not already typing
+          const existingUserIndex = draft.findIndex((user) => user.id === message.data.id);
+
+          if (existingUserIndex === -1) {
+            // Add new typing user
+            draft.push(message.data);
+          } else {
+            // Update existing user (if needed)
+            draft[existingUserIndex] = message.data;
           }
         })
       );
+
+      // Set new timeout to remove the user
       setTimeout(() => {
         setUsersTyping((prevUsers) =>
           produce(prevUsers, (draft) => {
-            const index = draft.indexOf(message.data);
+            const index = draft.findIndex((user) => user.id === message.data.id);
             if (index !== -1) {
-              draft.splice(index, 1); // Remove user from typing list
+              draft.splice(index, 1);
             }
           })
         );
-      }, 3000);
+      }, 2000);
     }
   });
 
@@ -222,8 +231,8 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
   };
 
   const handleTyping = useDebouncedCallback(() => {
-    channel.publish(MessageType.TypingEvent, user.username);
-  }, 500);
+    channel.publish(MessageType.TypingEvent, user);
+  }, 300);
 
   // TODO: More elegant way to handle the VH for chat area. Very hacky rn
   return (
@@ -268,9 +277,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
                     <ChatMessage key={message.id} message={message} users={currUsers} />
                   ))}
                 </ScrollArea>
-
                 <TypingIndicator usersTyping={usersTyping} />
-
                 <TextInput
                   pt="sm"
                   placeholder="chat"

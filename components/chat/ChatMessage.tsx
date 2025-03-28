@@ -1,4 +1,5 @@
-import { Avatar, Group, Indicator, Paper, Stack, Text } from '@mantine/core';
+import Image from 'next/image';
+import { Avatar, Group, HoverCard, Indicator, Paper, Stack, Text } from '@mantine/core';
 import { Message, UserInfo } from './chat.interfaces';
 
 interface ChatMessageProps {
@@ -34,7 +35,17 @@ export function ChatMessage({ message, users }: ChatMessageProps) {
           </Group>
         </Group>
         <Paper p="xs" radius="lg" style={{ width: 'fit-content' }}>
-          <Text size="sm">{message.message}</Text>
+          <HoverCard width={320} shadow="md" openDelay={200} closeDelay={400}>
+            <HoverCard.Target>
+              <Text size="sm">{message.message}</Text>
+            </HoverCard.Target>
+            <HoverCard.Dropdown>
+              <Group>
+                <Image src="/emotes/a_(smile)_40.webp" width={30} height={30} alt="big grin" />
+                <Image src="/emotes/a_(biggrin)_40.webp" width={30} height={30} alt="big grin" />
+              </Group>
+            </HoverCard.Dropdown>
+          </HoverCard>
         </Paper>
       </Stack>
     </Group>
