@@ -16,7 +16,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
-import { useDebouncedCallback, useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { useDisclosure, useMediaQuery, useThrottledCallback } from '@mantine/hooks';
 import {
   createAnonymousUser,
   getMessages,
@@ -38,9 +38,14 @@ interface ChatProps {
   existingMessages: Message[];
 }
 
+type TypingTimeouts = {
+  [userId: string]: NodeJS.Timeout;
+};
+
 export function ChatBox({ user, existingMessages }: ChatProps) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const typingTimeouts = useRef<TypingTimeouts>({});
   const [messages, setMessages] = useState<Message[]>(existingMessages);
   const [pendingMessage, setPendingMessage] = useState<string>('');
   const [usersTyping, setUsersTyping] = useState<UserInfo[]>([]);
@@ -62,23 +67,27 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
         })
       );
     } else if (message.name === MessageType.TypingEvent) {
+      // Clear any existing timeout for this user first
+      if (typingTimeouts.current[message.data.id]) {
+        clearTimeout(typingTimeouts.current[message.data.id]);
+        delete typingTimeouts.current[message.data.id];
+      }
+
       // Update the typing users list
       setUsersTyping((prevUsers) =>
         produce(prevUsers, (draft) => {
           const existingUserIndex = draft.findIndex((user) => user.id === message.data.id);
 
           if (existingUserIndex === -1) {
-            // Add new typing user
             draft.push(message.data);
           } else {
-            // Update existing user (if needed)
             draft[existingUserIndex] = message.data;
           }
         })
       );
 
-      // Set new timeout to remove the user
-      setTimeout(() => {
+      // Set new timeout after state update
+      typingTimeouts.current[message.data.id] = setTimeout(() => {
         setUsersTyping((prevUsers) =>
           produce(prevUsers, (draft) => {
             const index = draft.findIndex((user) => user.id === message.data.id);
@@ -87,6 +96,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
             }
           })
         );
+        delete typingTimeouts.current[message.data.id];
       }, 2000);
     }
   });
@@ -230,9 +240,9 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
     revalidateMain();
   };
 
-  const handleTyping = useDebouncedCallback(() => {
+  const handleTyping = useThrottledCallback(() => {
     channel.publish(MessageType.TypingEvent, user);
-  }, 300);
+  }, 3000);
 
   // TODO: More elegant way to handle the VH for chat area. Very hacky rn
   return (
