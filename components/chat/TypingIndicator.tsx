@@ -1,4 +1,4 @@
-import { Avatar, Box, Group, Loader, Tooltip } from '@mantine/core';
+import { Avatar, Group, Loader, Tooltip } from '@mantine/core';
 import { UserInfo } from './chat.interfaces';
 import { TypingIndicatorDots } from './TypingIndicatorDots';
 
@@ -8,7 +8,7 @@ interface TypingIndicatorProps {
 
 export function TypingIndicator({ usersTyping }: TypingIndicatorProps) {
   return (
-    <Box h="1em" mb="md">
+    <>
       {usersTyping.length > 0 && (
         <Group gap="2px" align="center">
           <Avatar.Group>
@@ -22,6 +22,6 @@ export function TypingIndicator({ usersTyping }: TypingIndicatorProps) {
           <Loader loaders={{ ...Loader.defaultLoaders, ring: TypingIndicatorDots }} type="ring" />
         </Group>
       )}
-    </Box>
+    </>
   );
 }

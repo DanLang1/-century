@@ -16,7 +16,7 @@ export function ActiveUserDisplay({ users, openUserModal, currUserId }: ActiveUs
       radius="md"
       p="sm"
       bg="var(--mantine-color-blue-light)"
-      h="59vh"
+      h="60vh"
     >
       <ScrollArea h="50vh" type="always" p="xs" bd="rounded" pr="0">
         <Stack>

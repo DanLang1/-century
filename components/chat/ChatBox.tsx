@@ -6,6 +6,7 @@ import { useChannel, usePresence, usePresenceListener } from 'ably/react';
 import { produce } from 'immer';
 import {
   ActionIcon,
+  Box,
   Center,
   darken,
   Group,
@@ -31,6 +32,7 @@ import { ActiveUserDisplayMobile } from './ActiveUserDisplayMobile';
 import { Chat, Message, UserForm, UserInfo } from './chat.interfaces';
 import { MessageType } from './ChatConstants';
 import { ChatMessage } from './ChatMessage';
+import { EmojiModal } from './EmojiModal/EmojiModal';
 import { TypingIndicator } from './TypingIndicator';
 import { UserSelectModal } from './UserSelectModal';
 
@@ -47,6 +49,8 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const typingTimeouts = useRef<TypingTimeouts>({});
+  const inputRef = useRef<HTMLInputElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>(existingMessages);
   const [pendingMessage, setPendingMessage] = useState<string>('');
   const [usersTyping, setUsersTyping] = useState<UserInfo[]>([]);
@@ -111,9 +115,6 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
     };
   });
 
-  const ref = useRef<HTMLInputElement>(null);
-  const viewport = useRef<HTMLDivElement>(null);
-
   const scrollToBottom = () =>
     viewport.current!.scrollTo({ top: viewport.current!.scrollHeight, behavior: 'smooth' });
 
@@ -151,8 +152,25 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
 
   useEffect(() => {
     scrollToBottom();
-    ref.current?.focus();
+    inputRef.current?.focus();
   }, [messages]);
+
+  useEffect(() => {
+    if (usersTyping.length > 0 && isNearBottom()) {
+      scrollToBottom();
+      inputRef.current?.focus();
+    }
+  }, [usersTyping]);
+
+  // Helper function
+  const isNearBottom = () => {
+    const { scrollTop, scrollHeight, clientHeight } = viewport.current ?? {
+      scrollTop: 0,
+      scrollHeight: 0,
+      clientHeight: 0,
+    };
+    return scrollHeight - (scrollTop + clientHeight) < 200;
+  };
 
   const handleSubmit = async (values: Chat) => {
     if (!user) {
@@ -242,12 +260,14 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
   };
 
   const handleTyping = useThrottledCallback(() => {
-    channel.publish(MessageType.TypingEvent, user);
+    if (user.id) {
+      channel.publish(MessageType.TypingEvent, user);
+    }
   }, 3000);
 
   // TODO: More elegant way to handle the VH for chat area. Very hacky rn
   return (
-    <Center pt={{ base: 'sm', md: 'xl' }}>
+    <Center pt={{ base: 'sm', md: 'md' }}>
       <form id="userForm" onSubmit={userForm.onSubmit((values) => handleUserSetForm(values))}>
         <UserSelectModal
           modalOpened={modalOpened}
@@ -266,20 +286,22 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
             radius={isMobile ? 'xs' : 'md'}
             p="sm"
             bg={darken('var(--mantine-color-blue-light)', 0.15)}
-            h={isMobile ? 'auto' : '59vh'}
+            h={isMobile ? 'auto' : '60vh'}
           >
             {/* small screen users button */}
             <Group pb="sm" justify="flex-end" hiddenFrom="sm">
               <ActiveAvatarDisplay users={currUsers} openDrawer={toggle} />
             </Group>
-            <Stack gap="2px">
+            <Stack gap="2px" style={{ height: '100%' }}>
               <ScrollArea
                 scrollbars="y"
-                h={
-                  isMobile
+                style={{
+                  flexGrow: 1,
+                  height: isMobile
                     ? `calc(100vh - var(--app-shell-header-height) - var(--app-shell-padding) - 15em)`
-                    : '50vh'
-                }
+                    : `calc(100vh - var(--app-shell-header-height) - 10em)`,
+                  minHeight: '200px', // Ensures it never gets too small
+                }}
                 type="always"
                 viewportRef={viewport}
                 p="0"
@@ -287,20 +309,24 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
                 {messages.map((message) => (
                   <ChatMessage key={message.id} message={message} users={currUsers} />
                 ))}
+                <TypingIndicator usersTyping={usersTyping} />
               </ScrollArea>
-              <TypingIndicator usersTyping={usersTyping} />
-              <TextInput
-                pt="sm"
-                placeholder="chat"
-                {...form.getInputProps('message')}
-                key={form.key('message')}
-                onChange={(event) => {
-                  form.setFieldValue('message', event.target.value);
-                  handleTyping();
-                }}
-                ref={ref}
-                rightSection={send()}
-              />
+
+              <Box style={{ flexShrink: 0, paddingTop: 'sm' }}>
+                <TextInput
+                  mt="xs"
+                  placeholder="chat"
+                  {...form.getInputProps('message')}
+                  key={form.key('message')}
+                  onChange={(event) => {
+                    form.setFieldValue('message', event.target.value);
+                    handleTyping();
+                  }}
+                  ref={inputRef}
+                  leftSection={<EmojiModal form={form} inputRef={inputRef} />}
+                  rightSection={send()}
+                />
+              </Box>
             </Stack>
             <ActiveUserDisplayMobile
               opened={opened}
@@ -310,6 +336,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
               currUserId={user?.id}
             />
           </Paper>
+
           <ActiveUserDisplay users={currUsers} currUserId={user?.id} openUserModal={toggleModal} />
         </Group>
       </form>

@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Avatar, Group, HoverCard, Indicator, Paper, Stack, Text } from '@mantine/core';
+import { Avatar, Group, Indicator, Paper, Stack, Text } from '@mantine/core';
 import { Message, UserInfo } from './chat.interfaces';
 
 interface ChatMessageProps {
@@ -11,6 +11,36 @@ export function ChatMessage({ message, users }: ChatMessageProps) {
   // timestamp is in UTC for standardization, convert to users local timezone so it shows correctly for them.
   const userTimeStamp = new Date(message.timestamp).toLocaleString();
   const matchingUser = users.find((user) => user.id === message.profiles.id);
+
+  const emojiMap: Record<string, string> = {
+    '(biggrin)': '/emotes/a_(biggrin)_40.webp',
+    '(smile)': '/emotes/a_(smile)_40.webp',
+  };
+
+  const formatMessage = (message: string | null) => {
+    if (message === null) {
+      return null;
+    }
+
+    return message.split(/(\(.*?\))/g).map((part, index) =>
+      emojiMap[part] ? (
+        <Image
+          key={index}
+          src={emojiMap[part]}
+          alt={part}
+          width={15}
+          height={15}
+          style={{
+            marginLeft: '2px',
+            marginBottom: '-3px',
+          }}
+        />
+      ) : (
+        part
+      )
+    );
+  };
+
   return (
     <Group align="flex-start" my="xs" wrap="nowrap" gap="xs">
       <Stack>
@@ -35,17 +65,17 @@ export function ChatMessage({ message, users }: ChatMessageProps) {
           </Group>
         </Group>
         <Paper p="xs" radius="lg" style={{ width: 'fit-content' }}>
-          <HoverCard width={320} shadow="md">
-            <HoverCard.Target>
-              <Text size="sm">{message.message}</Text>
-            </HoverCard.Target>
-            <HoverCard.Dropdown>
+          {/* <HoverCard width={320} shadow="md">
+            <HoverCard.Target> */}
+          <Text size="sm">{formatMessage(message.message)}</Text>
+          {/* </HoverCard.Target> */}
+          {/* <HoverCard.Dropdown>
               <Group>
                 <Image src="/emotes/a_(smile)_40.webp" width={30} height={30} alt="big grin" />
                 <Image src="/emotes/a_(biggrin)_40.webp" width={30} height={30} alt="big grin" />
               </Group>
-            </HoverCard.Dropdown>
-          </HoverCard>
+            </HoverCard.Dropdown> */}
+          {/* </HoverCard> */}
         </Paper>
         {/* 
         <Badge
