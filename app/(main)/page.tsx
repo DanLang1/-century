@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Flex, Stack } from '@mantine/core';
+import { Stack } from '@mantine/core';
 import { UserInfo } from '@/components/chat/chat.interfaces';
 import { ChatContainer } from '@/components/chat/ChatContainer';
 import { Welcome } from '@/components/Welcome/Welcome';
