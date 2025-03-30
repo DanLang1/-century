@@ -24,7 +24,12 @@ export function UserSelectModal({ modalOpened, toggleModal, form, user }: UserSe
   const isAnon = user.anonymous;
   const isGuest = user.id === '';
   return (
-    <Modal opened={modalOpened} onClose={toggleModal} title="Select User Icon and Username">
+    <Modal
+      opened={modalOpened}
+      onClose={toggleModal}
+      title="Select User Icon and Username"
+      zIndex={202}
+    >
       <Stack>
         <AvatarSelector form={form} />
         {form.errors.avatar && (

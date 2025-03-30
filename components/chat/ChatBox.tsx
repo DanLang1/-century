@@ -7,7 +7,7 @@ import { produce } from 'immer';
 import {
   ActionIcon,
   Center,
-  Grid,
+  darken,
   Group,
   Paper,
   ScrollArea,
@@ -27,6 +27,7 @@ import {
 import { chatMessageSchema } from '@/lib/validation';
 import { ActiveAvatarDisplay } from './ActiveAvatarDisplay';
 import { ActiveUserDisplay } from './ActiveUserDisplay';
+import { ActiveUserDisplayMobile } from './ActiveUserDisplayMobile';
 import { Chat, Message, UserForm, UserInfo } from './chat.interfaces';
 import { MessageType } from './ChatConstants';
 import { ChatMessage } from './ChatMessage';
@@ -257,60 +258,60 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
       </form>
 
       <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
-        <Paper
-          w={{ base: '100vw', sm: '50vw', md: '60vw', lg: '70vw' }}
-          shadow="md"
-          bd="md"
-          radius={isMobile ? 'xs' : 'md'}
-          p="sm"
-          bg="var(--mantine-color-blue-light)"
-        >
-          <Grid>
-            <Grid.Col span={{ base: 12, sm: 9 }}>
-              {/* small screen users button */}
-              <Group pb="sm" justify="flex-end" hiddenFrom="sm">
-                <ActiveAvatarDisplay users={currUsers} openDrawer={toggle} />
-              </Group>
-              <Stack gap="2px">
-                <ScrollArea
-                  scrollbars="y"
-                  h={
-                    isMobile
-                      ? `calc(100vh - var(--app-shell-header-height) - var(--app-shell-padding) - 15em)`
-                      : '50vh'
-                  }
-                  type="always"
-                  viewportRef={viewport}
-                  p="0"
-                >
-                  {messages.map((message) => (
-                    <ChatMessage key={message.id} message={message} users={currUsers} />
-                  ))}
-                </ScrollArea>
-                <TypingIndicator usersTyping={usersTyping} />
-                <TextInput
-                  pt="sm"
-                  placeholder="chat"
-                  {...form.getInputProps('message')}
-                  key={form.key('message')}
-                  onChange={(event) => {
-                    form.setFieldValue('message', event.target.value);
-                    handleTyping();
-                  }}
-                  ref={ref}
-                  rightSection={send()}
-                />
-              </Stack>
-            </Grid.Col>
-            <ActiveUserDisplay
+        <Group gap="5px">
+          <Paper
+            w={{ base: '100vw', sm: '40vw' }}
+            shadow="md"
+            bd="md"
+            radius={isMobile ? 'xs' : 'md'}
+            p="sm"
+            bg={darken('var(--mantine-color-blue-light)', 0.15)}
+            h={isMobile ? 'auto' : '59vh'}
+          >
+            {/* small screen users button */}
+            <Group pb="sm" justify="flex-end" hiddenFrom="sm">
+              <ActiveAvatarDisplay users={currUsers} openDrawer={toggle} />
+            </Group>
+            <Stack gap="2px">
+              <ScrollArea
+                scrollbars="y"
+                h={
+                  isMobile
+                    ? `calc(100vh - var(--app-shell-header-height) - var(--app-shell-padding) - 15em)`
+                    : '50vh'
+                }
+                type="always"
+                viewportRef={viewport}
+                p="0"
+              >
+                {messages.map((message) => (
+                  <ChatMessage key={message.id} message={message} users={currUsers} />
+                ))}
+              </ScrollArea>
+              <TypingIndicator usersTyping={usersTyping} />
+              <TextInput
+                pt="sm"
+                placeholder="chat"
+                {...form.getInputProps('message')}
+                key={form.key('message')}
+                onChange={(event) => {
+                  form.setFieldValue('message', event.target.value);
+                  handleTyping();
+                }}
+                ref={ref}
+                rightSection={send()}
+              />
+            </Stack>
+            <ActiveUserDisplayMobile
               opened={opened}
               toggle={toggle}
               users={currUsers}
               openUserModal={toggleModal}
               currUserId={user?.id}
             />
-          </Grid>
-        </Paper>
+          </Paper>
+          <ActiveUserDisplay users={currUsers} currUserId={user?.id} openUserModal={toggleModal} />
+        </Group>
       </form>
     </Center>
   );

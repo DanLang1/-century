@@ -35,7 +35,7 @@ export function ChatMessage({ message, users }: ChatMessageProps) {
           </Group>
         </Group>
         <Paper p="xs" radius="lg" style={{ width: 'fit-content' }}>
-          <HoverCard width={320} shadow="md" openDelay={200} closeDelay={400}>
+          <HoverCard width={320} shadow="md">
             <HoverCard.Target>
               <Text size="sm">{message.message}</Text>
             </HoverCard.Target>
@@ -47,6 +47,20 @@ export function ChatMessage({ message, users }: ChatMessageProps) {
             </HoverCard.Dropdown>
           </HoverCard>
         </Paper>
+        {/* 
+        <Badge
+          size="lg"
+          // px="xs"
+          variant="filled"
+          color="#181919"
+          bd="1px solid #2f2f2f"
+          // bd="1px solid var(--mantine-color-gray-light)"
+          leftSection={
+            <Image src="/emotes/a_(smile)_40.webp" width={15} height={15} alt="big grin" />
+          }
+        >
+          1
+        </Badge> */}
       </Stack>
     </Group>
   );
