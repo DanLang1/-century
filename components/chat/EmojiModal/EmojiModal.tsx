@@ -63,6 +63,7 @@ export function EmojiModal({ form, inputRef }: EmojiModalProps) {
           theme={Theme.DARK}
           emojiStyle={EmojiStyle.NATIVE}
           skinTonesDisabled
+          autoFocusSearch={false}
         />
       </Popover.Dropdown>
     </Popover>
