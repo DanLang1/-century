@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Avatar, Group, Indicator, Paper, Stack, Text } from '@mantine/core';
 import { Message, UserInfo } from './chat.interfaces';
+import { emojiMap } from './EmojiModal/CustomEmojiConstants';
 
 interface ChatMessageProps {
   message: Message;
@@ -12,33 +13,27 @@ export function ChatMessage({ message, users }: ChatMessageProps) {
   const userTimeStamp = new Date(message.timestamp).toLocaleString();
   const matchingUser = users.find((user) => user.id === message.profiles.id);
 
-  const emojiMap: Record<string, string> = {
-    '(biggrin)': '/emotes/a_(biggrin)_40.webp',
-    '(smile)': '/emotes/a_(smile)_40.webp',
-  };
-
   const formatMessage = (message: string | null) => {
     if (message === null) {
       return null;
     }
 
-    return message.split(/(\(.*?\))/g).map((part, index) =>
-      emojiMap[part] ? (
-        <Image
-          key={index}
-          src={emojiMap[part]}
-          alt={part}
-          width={15}
-          height={15}
-          style={{
-            marginLeft: '2px',
-            marginBottom: '-3px',
-          }}
-        />
-      ) : (
-        part
-      )
-    );
+    return message
+      .split(/(\(.*?\))/g)
+      .map((part, index) =>
+        emojiMap[part] ? (
+          <Image
+            key={index}
+            src={emojiMap[part]}
+            alt={part}
+            width={15}
+            height={15}
+            style={{ marginLeft: '2px', marginBottom: '-3px' }}
+          />
+        ) : (
+          part
+        )
+      );
   };
 
   return (

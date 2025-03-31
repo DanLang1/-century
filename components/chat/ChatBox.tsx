@@ -6,7 +6,6 @@ import { useChannel, usePresence, usePresenceListener } from 'ably/react';
 import { produce } from 'immer';
 import {
   ActionIcon,
-  Box,
   Center,
   darken,
   Group,
@@ -41,9 +40,7 @@ interface ChatProps {
   existingMessages: Message[];
 }
 
-type TypingTimeouts = {
-  [userId: string]: NodeJS.Timeout;
-};
+type TypingTimeouts = { [userId: string]: NodeJS.Timeout };
 
 export function ChatBox({ user, existingMessages }: ChatProps) {
   const theme = useMantineTheme();
@@ -120,9 +117,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
 
   const form = useForm<Chat>({
     mode: 'controlled',
-    initialValues: {
-      message: '',
-    },
+    initialValues: { message: '' },
     validate: zodResolver(chatMessageSchema),
   });
 
@@ -187,11 +182,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       message: values.message,
-      profiles: {
-        username: user.username,
-        avatar: user.avatar,
-        id: user.id,
-      },
+      profiles: { username: user.username, avatar: user.avatar, id: user.id },
     };
 
     channel.publish({ name: MessageType.ChatMessage, data: tempMessage });
@@ -312,21 +303,19 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
                 <TypingIndicator usersTyping={usersTyping} />
               </ScrollArea>
 
-              <Box style={{ flexShrink: 0, paddingTop: 'sm' }}>
-                <TextInput
-                  mt="xs"
-                  placeholder="chat"
-                  {...form.getInputProps('message')}
-                  key={form.key('message')}
-                  onChange={(event) => {
-                    form.setFieldValue('message', event.target.value);
-                    handleTyping();
-                  }}
-                  ref={inputRef}
-                  leftSection={<EmojiModal form={form} inputRef={inputRef} />}
-                  rightSection={send()}
-                />
-              </Box>
+              <TextInput
+                mt="xs"
+                placeholder="chat"
+                {...form.getInputProps('message')}
+                key={form.key('message')}
+                onChange={(event) => {
+                  form.setFieldValue('message', event.target.value);
+                  handleTyping();
+                }}
+                ref={inputRef}
+                leftSection={<EmojiModal form={form} inputRef={inputRef} />}
+                rightSection={send()}
+              />
             </Stack>
             <ActiveUserDisplayMobile
               opened={opened}

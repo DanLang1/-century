@@ -4,7 +4,7 @@ import EmojiPicker, { EmojiClickData, EmojiStyle, Theme } from 'emoji-picker-rea
 import { ActionIcon, Popover } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { Chat } from '../chat.interfaces';
-import { emojiCategories } from './EmojiCategories';
+import { customEmojis, emojiCategories } from './CustomEmojiConstants';
 
 interface EmojiModalProps {
   form: UseFormReturnType<Chat>;
@@ -25,29 +25,10 @@ export function EmojiModal({ form, inputRef }: EmojiModalProps) {
     form.setValues({ message: newVal });
   };
 
-  const customEmojis = [
-    {
-      names: ['Big Grin', 'big grin'],
-      imgUrl: '/emotes/a_(biggrin)_40.webp',
-      id: '(biggrin)',
-    },
-    {
-      names: ['Smile', 'smile'],
-      imgUrl: '/emotes/a_(smile)_40.webp',
-      id: '(smile)',
-    },
-  ];
-
   return (
     <Popover
       position="bottom"
-      styles={{
-        dropdown: {
-          padding: 0,
-          background: 'transparent',
-          border: 'none',
-        },
-      }}
+      styles={{ dropdown: { padding: 0, background: 'transparent', border: 'none' } }}
     >
       <Popover.Target>
         <ActionIcon variant="transparent">

@@ -27,13 +27,9 @@ export const emailPasswordSignupSchema = z.object({
   password: z.string().min(6, { message: 'Password should include at least 6 characters' }),
 });
 
-export const confirmEmailSchema = z.object({
-  passcode: z.string().min(6).max(6),
-});
+export const confirmEmailSchema = z.object({ passcode: z.string().min(6).max(6) });
 
-export const emailSchema = z.object({
-  email: z.string().email({ message: 'Invalid Email' }),
-});
+export const emailSchema = z.object({ email: z.string().email({ message: 'Invalid Email' }) });
 
 export const passwordSchema = z.object({
   password: z.string().min(6, { message: 'Password should include at least 6 characters' }),
