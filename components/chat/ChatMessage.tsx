@@ -1,17 +1,41 @@
 import Image from 'next/image';
-import { Avatar, Group, Indicator, Paper, Stack, Text } from '@mantine/core';
-import { Message, UserInfo } from './chat.interfaces';
+import {
+  Avatar,
+  Badge,
+  Group,
+  Indicator,
+  Paper,
+  Stack,
+  Text,
+  Tooltip,
+  useMantineColorScheme,
+} from '@mantine/core';
+import { Message, ReactionValue, UserInfo } from './chat.interfaces';
 import { emojiMap } from './EmojiModal/CustomEmojiConstants';
+import { EmojiReaction } from './EmojiModal/EmojiReaction';
+import classes from './ChatMessage.module.css';
 
 interface ChatMessageProps {
   message: Message;
   users: UserInfo[];
+  user: UserInfo;
 }
 
-export function ChatMessage({ message, users }: ChatMessageProps) {
+export function ChatMessage({ message, users, user }: ChatMessageProps) {
   // timestamp is in UTC for standardization, convert to users local timezone so it shows correctly for them.
   const userTimeStamp = new Date(message.timestamp).toLocaleString();
   const matchingUser = users.find((user) => user.id === message.profiles.id);
+  const reactionCounts = (message.reactions ?? []).reduce<Record<string, ReactionValue>>(
+    (acc, reaction) => {
+      if (!acc[reaction.emoji]) {
+        acc[reaction.emoji] = { xatType: reaction.xatType, usernames: [] };
+      }
+
+      acc[reaction.emoji].usernames.push(reaction.username);
+      return acc;
+    },
+    {}
+  );
 
   const formatMessage = (message: string | null) => {
     if (message === null) {
@@ -23,11 +47,12 @@ export function ChatMessage({ message, users }: ChatMessageProps) {
       .map((part, index) =>
         emojiMap[part] ? (
           <Image
+            unoptimized
             key={index}
             src={emojiMap[part]}
             alt={part}
-            width={15}
-            height={15}
+            width={25}
+            height={25}
             style={{ marginLeft: '2px', marginBottom: '-3px' }}
           />
         ) : (
@@ -59,33 +84,32 @@ export function ChatMessage({ message, users }: ChatMessageProps) {
             </Text>
           </Group>
         </Group>
-        <Paper p="xs" radius="lg" style={{ width: 'fit-content' }}>
-          {/* <HoverCard width={320} shadow="md">
-            <HoverCard.Target> */}
+
+        <Paper p="xs" pr="lg" radius="lg" className={classes.paper}>
+          <EmojiReaction message={message} currUser={user} />
           <Text size="sm">{formatMessage(message.message)}</Text>
-          {/* </HoverCard.Target> */}
-          {/* <HoverCard.Dropdown>
-              <Group>
-                <Image src="/emotes/a_(smile)_40.webp" width={30} height={30} alt="big grin" />
-                <Image src="/emotes/a_(biggrin)_40.webp" width={30} height={30} alt="big grin" />
-              </Group>
-            </HoverCard.Dropdown> */}
-          {/* </HoverCard> */}
         </Paper>
-        {/* 
-        <Badge
-          size="lg"
-          // px="xs"
-          variant="filled"
-          color="#181919"
-          bd="1px solid #2f2f2f"
-          // bd="1px solid var(--mantine-color-gray-light)"
-          leftSection={
-            <Image src="/emotes/a_(smile)_40.webp" width={15} height={15} alt="big grin" />
-          }
-        >
-          1
-        </Badge> */}
+
+        <Group gap="2px">
+          {Object.entries(reactionCounts)?.map(([emoji, { xatType, usernames }], index) => (
+            <Tooltip color="grey" label={usernames.join(', ')} key={`${index}-${emoji}`}>
+              <Badge
+                key={`${emoji}-${index}`}
+                size="lg"
+                classNames={{ label: classes.label, root: classes.root }}
+                leftSection={
+                  xatType ? (
+                    <Image src={emoji} width={15} height={15} alt={emoji} unoptimized />
+                  ) : (
+                    emoji
+                  )
+                }
+              >
+                {usernames.length}
+              </Badge>
+            </Tooltip>
+          ))}
+        </Group>
       </Stack>
     </Group>
   );

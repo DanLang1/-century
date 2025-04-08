@@ -23,4 +23,16 @@ export interface Message {
     username: string;
     id: string;
   };
+  reactions?: Reaction[];
+}
+
+export interface Reaction {
+  emoji: string;
+  username: string;
+  xatType: boolean;
+}
+
+export interface ReactionValue {
+  xatType: boolean;
+  usernames: string[];
 }

@@ -1,0 +1,32 @@
+.label {
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+}
+
+.root {
+  /* --badge-bg: light-dark(var(--mantine-color-dark-8), var(--mantine-color-gray-0)); */
+  --badge-bg: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+  --badge-bd: light-dark(
+    1px solid var(--mantine-color-dark-1),
+    1px solid var(--mantine-color-gray-8)
+  );
+}
+
+.paper {
+  position: relative;
+  height: fit-content;
+  width: fit-content;
+}
+
+/* Hide icon by default */
+.actionIcon {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+/* Show icon on hover */
+.paper:hover .actionIcon {
+  opacity: 1;
+}

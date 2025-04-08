@@ -48,7 +48,8 @@ export function AuthenticationForm(props: PaperProps) {
       const { errors } = await signup(formData);
       form.setErrors(errors);
     } else if (type === 'login') {
-      await login(formData);
+      const { errors } = await login(formData);
+      form.setErrors(errors);
     }
   };
 
@@ -98,7 +99,7 @@ export function AuthenticationForm(props: PaperProps) {
             placeholder="vampiruuu@century.com"
             value={form.values.email}
             onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
-            error={form.errors.email && 'Invalid email'}
+            error={form.errors.email}
             radius="md"
           />
 

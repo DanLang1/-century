@@ -100,6 +100,15 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
         );
         delete typingTimeouts.current[message.data.id];
       }, 2000);
+    } else if (message.name === MessageType.ReactionAdded) {
+      setMessages((prevMessages) =>
+        produce(prevMessages, (draft) => {
+          const index = draft.findIndex((m) => m.id === message.data.id);
+          if (index !== -1) {
+            draft[index] = message.data;
+          }
+        })
+      );
     }
   });
 
@@ -296,9 +305,10 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
                 type="always"
                 viewportRef={viewport}
                 p="0"
+                offsetScrollbars="y"
               >
                 {messages.map((message) => (
-                  <ChatMessage key={message.id} message={message} users={currUsers} />
+                  <ChatMessage key={message.id} message={message} users={currUsers} user={user} />
                 ))}
                 <TypingIndicator usersTyping={usersTyping} />
               </ScrollArea>
