@@ -1,15 +1,5 @@
 import Image from 'next/image';
-import {
-  Avatar,
-  Badge,
-  Group,
-  Indicator,
-  Paper,
-  Stack,
-  Text,
-  Tooltip,
-  useMantineColorScheme,
-} from '@mantine/core';
+import { Avatar, Badge, Group, Indicator, Paper, Stack, Text, Tooltip } from '@mantine/core';
 import { Message, ReactionValue, UserInfo } from './chat.interfaces';
 import { emojiMap } from './EmojiModal/CustomEmojiConstants';
 import { EmojiReaction } from './EmojiModal/EmojiReaction';
