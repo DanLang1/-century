@@ -126,10 +126,11 @@ export async function revalidateMain() {
   revalidatePath('/');
 }
 
-export async function sendMessage(id: string, message: string) {
+export async function sendMessage(id: string, message: string, messageId: string) {
   const supabase = await createClient();
 
   const body = {
+    id: messageId,
     user_id: id,
     message,
   };
@@ -146,13 +147,7 @@ export async function sendMessage(id: string, message: string) {
 export async function getMessages() {
   const supabase = await createClient();
 
-  // 3. Call the Supabase client and get the response
-  const { data, error } = await supabase
-    .from('messages')
-    .select(`id,timestamp, message, profiles(id, username, avatar)`)
-    .order('timestamp')
-    .limit(200);
-  // 4. If there was an error, throw it
+  const { data, error } = await supabase.from('enriched_messages').select('*');
   if (error) {
     console.error(error);
     redirect('/error');
@@ -162,4 +157,18 @@ export async function getMessages() {
   }
 
   return { data };
+}
+
+export async function addReaction(messageId: string, userId: string, emoji: string) {
+  const supabase = await createClient();
+  const body = {
+    message_id: messageId,
+    user_id: userId,
+    emoji,
+  };
+  const { error } = await supabase.from('reactions').insert(body);
+  if (error) {
+    console.error(error);
+    redirect('/error');
+  }
 }

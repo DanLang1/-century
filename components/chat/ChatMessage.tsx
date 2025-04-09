@@ -1,6 +1,18 @@
 import Image from 'next/image';
-import { Avatar, Badge, Group, Indicator, Paper, Stack, Text, Tooltip } from '@mantine/core';
+import { useChannel } from 'ably/react';
+import {
+  Avatar,
+  Badge,
+  Group,
+  Indicator,
+  Paper,
+  Stack,
+  Text,
+  Tooltip,
+  UnstyledButton,
+} from '@mantine/core';
 import { Message, ReactionValue, UserInfo } from './chat.interfaces';
+import { MessageType } from './ChatConstants';
 import { emojiMap } from './EmojiModal/CustomEmojiConstants';
 import { EmojiReaction } from './EmojiModal/EmojiReaction';
 import classes from './ChatMessage.module.css';
@@ -12,13 +24,14 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ message, users, user }: ChatMessageProps) {
+  const { channel } = useChannel('chat-demo');
   // timestamp is in UTC for standardization, convert to users local timezone so it shows correctly for them.
   const userTimeStamp = new Date(message.timestamp).toLocaleString();
-  const matchingUser = users.find((user) => user.id === message.profiles.id);
+  const matchingUser = users.find((user) => user.id === message.sender_id);
   const reactionCounts = (message.reactions ?? []).reduce<Record<string, ReactionValue>>(
     (acc, reaction) => {
       if (!acc[reaction.emoji]) {
-        acc[reaction.emoji] = { xatType: reaction.xatType, usernames: [] };
+        acc[reaction.emoji] = { xatType: reaction.emoji.includes('.webp'), usernames: [] };
       }
 
       acc[reaction.emoji].usernames.push(reaction.username);
@@ -51,6 +64,27 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
       );
   };
 
+  const handleEmojiReact = (emoji: string, xatType: boolean) => {
+    const reactions = message.reactions ?? [];
+    const existingReactionIndex = reactions.findIndex(
+      (reaction) => reaction.username === user.username && reaction.emoji === emoji
+    );
+    const updatedReactions =
+      existingReactionIndex !== -1
+        ? reactions.filter((_, i) => i !== existingReactionIndex)
+        : [
+            ...reactions,
+            { emoji, username: user.username, xatType, userId: user.id, message_id: message.id },
+          ];
+
+    const messageWithEmoji: Message = {
+      ...message,
+      reactions: updatedReactions,
+    };
+
+    channel.publish({ name: MessageType.ReactionAdded, data: messageWithEmoji });
+  };
+
   return (
     <Group align="flex-start" my="xs" wrap="nowrap" gap="xs">
       <Stack>
@@ -60,14 +94,14 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
           offset={3}
           withBorder
         >
-          <Avatar size="md" src={matchingUser?.avatar ?? message.profiles.avatar} mt="4" />
+          <Avatar size="md" src={matchingUser?.avatar ?? message.sender_avatar} mt="4" />
         </Indicator>
       </Stack>
       <Stack gap="4">
         <Group gap="xs">
           <Group align="baseline" gap="xs">
             <Text size="md" fw={500}>
-              {matchingUser?.username ?? message.profiles.username}
+              {matchingUser?.username ?? message.sender_username}
             </Text>
             <Text size="xs" c="dimmed">
               {userTimeStamp}
@@ -83,20 +117,22 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
         <Group gap="2px">
           {Object.entries(reactionCounts)?.map(([emoji, { xatType, usernames }], index) => (
             <Tooltip color="grey" label={usernames.join(', ')} key={`${index}-${emoji}`}>
-              <Badge
-                key={`${emoji}-${index}`}
-                size="lg"
-                classNames={{ label: classes.label, root: classes.root }}
-                leftSection={
-                  xatType ? (
-                    <Image src={emoji} width={15} height={15} alt={emoji} unoptimized />
-                  ) : (
-                    emoji
-                  )
-                }
-              >
-                {usernames.length}
-              </Badge>
+              <UnstyledButton onClick={() => handleEmojiReact(emoji, xatType)}>
+                <Badge
+                  key={`${emoji}-${index}`}
+                  size="lg"
+                  classNames={{ label: classes.label, root: classes.root }}
+                  leftSection={
+                    xatType ? (
+                      <Image src={emoji} width={15} height={15} alt={emoji} unoptimized />
+                    ) : (
+                      emoji
+                    )
+                  }
+                >
+                  {usernames.length}
+                </Badge>
+              </UnstyledButton>
             </Tooltip>
           ))}
         </Group>

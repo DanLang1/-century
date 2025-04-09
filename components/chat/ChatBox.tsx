@@ -191,13 +191,15 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       message: values.message,
-      profiles: { username: user.username, avatar: user.avatar, id: user.id },
+      sender_username: user.username,
+      sender_avatar: user.avatar,
+      sender_id: user.id,
     };
 
     channel.publish({ name: MessageType.ChatMessage, data: tempMessage });
     form.reset();
     // if saving message fails, hopefully it wasn't important
-    await sendMessage(user.id, values.message);
+    await sendMessage(user.id, values.message, tempMessage.id);
   };
 
   const send = () => {
@@ -239,14 +241,12 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           message: pendingMessage,
-          profiles: {
-            username: userInfoFromDb.username,
-            avatar: userInfoFromDb.avatar,
-            id: userInfoFromDb.id,
-          },
+          sender_username: userInfoFromDb.username,
+          sender_avatar: userInfoFromDb.avatar,
+          sender_id: userInfoFromDb.id,
         };
         channel.publish({ name: MessageType.ChatMessage, data: tempMessage });
-        await sendMessage(userInfoFromDb.id, pendingMessage);
+        await sendMessage(userInfoFromDb.id, pendingMessage, tempMessage.id);
       }
       const messages = await getMessages();
       setMessages(messages.data);

@@ -1,9 +1,9 @@
-import { redirect } from 'next/navigation';
 import { Stack } from '@mantine/core';
 import { UserInfo } from '@/components/chat/chat.interfaces';
 import { ChatContainer } from '@/components/chat/ChatContainer';
 import { Welcome } from '@/components/Welcome/Welcome';
 import { createClient } from '@/utils/supabase/server';
+import { getMessages } from './actions';
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -33,21 +33,13 @@ export default async function HomePage() {
     }
   }
 
-  const { data: messagesData, error } = await supabase
-    .from('messages')
-    .select(`id, timestamp, message, profiles(username, avatar, id)`)
-    .order('timestamp')
-    .limit(200);
-
-  if (error) {
-    redirect('/error');
-  }
+  const messages = await getMessages();
 
   return (
     <Stack>
       <Welcome />
 
-      <ChatContainer user={currUser} messages={messagesData ?? []} />
+      <ChatContainer user={currUser} messages={messages.data ?? []} />
     </Stack>
   );
 }

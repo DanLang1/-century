@@ -15,21 +15,26 @@ export interface UserInfo {
 }
 
 export interface Message {
-  id: number | string;
+  id: string;
   timestamp: string;
   message: string | null;
-  profiles: {
-    avatar: string;
-    username: string;
-    id: string;
-  };
-  reactions?: Reaction[];
+  sender_username: string;
+  sender_avatar: string;
+  sender_id: string;
+  reactions?: ReactionDB[];
+}
+export interface ReactionDB {
+  message_id: string;
+  emoji: string;
+  username: string;
+  xatType?: boolean;
 }
 
 export interface Reaction {
   emoji: string;
   username: string;
   xatType: boolean;
+  userId: string;
 }
 
 export interface ReactionValue {

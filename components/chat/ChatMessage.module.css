@@ -9,6 +9,7 @@
     1px solid var(--mantine-color-dark-1),
     1px solid var(--mantine-color-gray-8)
   );
+  cursor: pointer;
 }
 
 .paper {
