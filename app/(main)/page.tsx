@@ -39,7 +39,7 @@ export default async function HomePage() {
     <Stack>
       <Welcome />
 
-      <ChatContainer user={currUser} messages={messages.data ?? []} />
+      <ChatContainer user={currUser} messages={messages ?? []} />
     </Stack>
   );
 }

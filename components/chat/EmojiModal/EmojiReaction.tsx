@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { IconMoodSmile } from '@tabler/icons-react';
 import { useChannel } from 'ably/react';
+import camelcaseKeys from 'camelcase-keys';
 import EmojiPicker, { EmojiClickData, EmojiStyle, Theme } from 'emoji-picker-react';
 import { ActionIcon, Popover } from '@mantine/core';
-import { addReaction } from '@/app/(main)/actions';
-import { Message, UserInfo } from '../chat.interfaces';
+import { notifications } from '@mantine/notifications';
+import { addReaction, removeReaction } from '@/app/(main)/actions';
+import { Message, ReactionDB, UserInfo } from '../chat.interfaces';
 import { MessageType } from '../ChatConstants';
 import { customEmojis, emojiCategories } from './CustomEmojiConstants';
 import classes from '../ChatMessage.module.css';
@@ -17,38 +19,70 @@ interface EmojiReactionProps {
 export function EmojiReaction({ message, currUser }: EmojiReactionProps) {
   const { channel } = useChannel('chat-demo');
   const [open, setOpen] = useState(false);
-  const onEmojiClick = (emojiObject: EmojiClickData) => {
+  const [loading, setLoading] = useState(false);
+
+  const onEmojiClick = async (emojiObject: EmojiClickData) => {
+    if (loading) {
+      notifications.show({
+        title: 'Slow Down',
+        message: 'Slow down please or you will break the DB :(',
+      });
+      return;
+    }
+    setLoading(true);
     const xatType = emojiObject.imageUrl?.includes('.webp') ?? false;
     const emoji = xatType ? emojiObject.imageUrl : emojiObject.emoji;
     const reactions = message.reactions ?? [];
 
-    const existingReactionIndex = reactions.findIndex(
+    const existingReaction = reactions.find(
       (reaction) => reaction.username === currUser.username && reaction.emoji === emoji
     );
 
-    const updatedReactions =
-      existingReactionIndex !== -1
-        ? reactions.filter((_, i) => i !== existingReactionIndex)
-        : [
-            ...reactions,
-            {
-              emoji,
-              username: currUser.username,
-              xatType,
-              userId: currUser.id,
-              message_id: message.id,
-            },
-          ];
-
     const messageWithEmoji: Message = {
       ...message,
-      reactions: updatedReactions,
     };
-    channel.publish({ name: MessageType.ReactionAdded, data: messageWithEmoji });
-    if (existingReactionIndex === -1) {
-      // create new reaction
-      addReaction(message.id, currUser.id, emoji);
+
+    if (existingReaction && existingReaction.reactionId) {
+      const { error } = await removeReaction(existingReaction.reactionId);
+      if (error) {
+        notifications.show({
+          title: 'You Win!',
+          color: 'red',
+          message: 'You broke the database, congratulations!',
+        });
+        setLoading(false);
+        return;
+      }
+      messageWithEmoji.reactions = reactions.filter(
+        (reaction) => reaction.reactionId !== existingReaction.reactionId
+      );
+    } else {
+      const { data, error } = await addReaction(message.id, currUser.id, emoji);
+      if (error) {
+        notifications.show({
+          title: 'You Win!',
+          color: 'red',
+          message: 'You broke the database, congratulations!',
+        });
+        setLoading(false);
+        return;
+      }
+      if (data) {
+        const reactionDb = camelcaseKeys(data);
+        const reactionParsed: ReactionDB = {
+          message_id: reactionDb.messageId ?? '',
+          username: currUser.username,
+          emoji: reactionDb.emoji ?? '',
+          xatType,
+          reactionId: reactionDb.id,
+        };
+        messageWithEmoji.reactions = [...reactions, reactionParsed];
+      }
     }
+
+    channel.publish({ name: MessageType.ReactionAdded, data: messageWithEmoji });
+    setLoading(false);
+
     setOpen(false);
   };
 

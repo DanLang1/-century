@@ -17,6 +17,7 @@ import {
 } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { useDisclosure, useMediaQuery, useThrottledCallback } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications';
 import {
   createAnonymousUser,
   getMessages,
@@ -191,15 +192,21 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       message: values.message,
-      sender_username: user.username,
-      sender_avatar: user.avatar,
-      sender_id: user.id,
+      senderUsername: user.username,
+      senderAvatar: user.avatar,
+      senderId: user.id,
     };
 
     channel.publish({ name: MessageType.ChatMessage, data: tempMessage });
     form.reset();
-    // if saving message fails, hopefully it wasn't important
-    await sendMessage(user.id, values.message, tempMessage.id);
+    const { error } = await sendMessage(user.id, values.message, tempMessage.id);
+    if (error) {
+      notifications.show({
+        title: 'You Win!',
+        color: 'red',
+        message: 'You broke the database, congratulations!',
+      });
+    }
   };
 
   const send = () => {
@@ -241,15 +248,22 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           message: pendingMessage,
-          sender_username: userInfoFromDb.username,
-          sender_avatar: userInfoFromDb.avatar,
-          sender_id: userInfoFromDb.id,
+          senderUsername: userInfoFromDb.username,
+          senderAvatar: userInfoFromDb.avatar,
+          senderId: userInfoFromDb.id,
         };
         channel.publish({ name: MessageType.ChatMessage, data: tempMessage });
-        await sendMessage(userInfoFromDb.id, pendingMessage, tempMessage.id);
+        const { error } = await sendMessage(userInfoFromDb.id, pendingMessage, tempMessage.id);
+        if (error) {
+          notifications.show({
+            title: 'You Win!',
+            color: 'red',
+            message: 'You broke the database, congratulations!',
+          });
+        }
       }
       const messages = await getMessages();
-      setMessages(messages.data);
+      setMessages(messages);
     }
 
     updateStatus(userInfoFromDb);

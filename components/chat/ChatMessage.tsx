@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import Image from 'next/image';
 import { useChannel } from 'ably/react';
+import camelcaseKeys from 'camelcase-keys';
 import {
   Avatar,
   Badge,
@@ -11,7 +13,9 @@ import {
   Tooltip,
   UnstyledButton,
 } from '@mantine/core';
-import { Message, ReactionValue, UserInfo } from './chat.interfaces';
+import { notifications } from '@mantine/notifications';
+import { addReaction, removeReaction } from '@/app/(main)/actions';
+import { Message, ReactionDB, ReactionValue, UserInfo } from './chat.interfaces';
 import { MessageType } from './ChatConstants';
 import { emojiMap } from './EmojiModal/CustomEmojiConstants';
 import { EmojiReaction } from './EmojiModal/EmojiReaction';
@@ -26,8 +30,9 @@ interface ChatMessageProps {
 export function ChatMessage({ message, users, user }: ChatMessageProps) {
   const { channel } = useChannel('chat-demo');
   // timestamp is in UTC for standardization, convert to users local timezone so it shows correctly for them.
+  const [loading, setLoading] = useState(false);
   const userTimeStamp = new Date(message.timestamp).toLocaleString();
-  const matchingUser = users.find((user) => user.id === message.sender_id);
+  const matchingUser = users.find((user) => user.id === message.senderId);
   const reactionCounts = (message.reactions ?? []).reduce<Record<string, ReactionValue>>(
     (acc, reaction) => {
       if (!acc[reaction.emoji]) {
@@ -64,25 +69,64 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
       );
   };
 
-  const handleEmojiReact = (emoji: string, xatType: boolean) => {
+  const handleEmojiReact = async (emoji: string, xatType: boolean) => {
+    if (loading) {
+      notifications.show({
+        title: 'Slow Down',
+        message: 'Slow down please or you will break the DB :(',
+      });
+      return;
+    }
+    setLoading(true);
     const reactions = message.reactions ?? [];
-    const existingReactionIndex = reactions.findIndex(
+    const existingReaction = reactions.find(
       (reaction) => reaction.username === user.username && reaction.emoji === emoji
     );
-    const updatedReactions =
-      existingReactionIndex !== -1
-        ? reactions.filter((_, i) => i !== existingReactionIndex)
-        : [
-            ...reactions,
-            { emoji, username: user.username, xatType, userId: user.id, message_id: message.id },
-          ];
 
     const messageWithEmoji: Message = {
       ...message,
-      reactions: updatedReactions,
     };
 
+    if (existingReaction && existingReaction.reactionId) {
+      const { error } = await removeReaction(existingReaction.reactionId);
+      if (error) {
+        notifications.show({
+          title: 'You Win!',
+          color: 'red',
+          message: 'You broke the database, congratulations!',
+        });
+        setLoading(false);
+        return;
+      }
+      messageWithEmoji.reactions = reactions.filter(
+        (reaction) => reaction.reactionId !== existingReaction.reactionId
+      );
+    } else {
+      const { data, error } = await addReaction(message.id, user.id, emoji);
+      if (error) {
+        notifications.show({
+          title: 'You Win!',
+          color: 'red',
+          message: 'You broke the database, congratulations!',
+        });
+        setLoading(false);
+        return;
+      }
+      if (data) {
+        const reactionDb = camelcaseKeys(data);
+        const reactionParsed: ReactionDB = {
+          message_id: reactionDb.messageId ?? '',
+          username: user.username,
+          emoji: reactionDb.emoji ?? '',
+          xatType,
+          reactionId: reactionDb.id,
+        };
+        messageWithEmoji.reactions = [...reactions, reactionParsed];
+      }
+    }
+
     channel.publish({ name: MessageType.ReactionAdded, data: messageWithEmoji });
+    setLoading(false);
   };
 
   return (
@@ -94,14 +138,14 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
           offset={3}
           withBorder
         >
-          <Avatar size="md" src={matchingUser?.avatar ?? message.sender_avatar} mt="4" />
+          <Avatar size="md" src={matchingUser?.avatar ?? message.senderAvatar} mt="4" />
         </Indicator>
       </Stack>
       <Stack gap="4">
         <Group gap="xs">
           <Group align="baseline" gap="xs">
             <Text size="md" fw={500}>
-              {matchingUser?.username ?? message.sender_username}
+              {matchingUser?.username ?? message.senderUsername}
             </Text>
             <Text size="xs" c="dimmed">
               {userTimeStamp}

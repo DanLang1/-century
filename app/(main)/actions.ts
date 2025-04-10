@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import camelcaseKeys from 'camelcase-keys';
 import { modalUserSelectSchema } from '@/lib/validation';
 import { createClient } from '@/utils/supabase/server';
 
@@ -135,13 +136,8 @@ export async function sendMessage(id: string, message: string, messageId: string
     message,
   };
 
-  // 3. Call the Supabase client and get the response
   const { error } = await supabase.from('messages').insert(body);
-  // 4. If there was an error, throw it
-  if (error) {
-    console.error(error);
-    redirect('/error');
-  }
+  return { error };
 }
 
 export async function getMessages() {
@@ -155,8 +151,9 @@ export async function getMessages() {
   if (!data) {
     redirect('/error');
   }
+  const messages = camelcaseKeys(data);
 
-  return { data };
+  return messages;
 }
 
 export async function addReaction(messageId: string, userId: string, emoji: string) {
@@ -166,9 +163,16 @@ export async function addReaction(messageId: string, userId: string, emoji: stri
     user_id: userId,
     emoji,
   };
-  const { error } = await supabase.from('reactions').insert(body);
+  const { data, error } = await supabase.from('reactions').insert(body).select().single();
+
   if (error) {
-    console.error(error);
-    redirect('/error');
+    return { error };
   }
+  return { data };
+}
+
+export async function removeReaction(reactionId: number) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('reactions').delete().eq('id', reactionId);
+  return { error };
 }

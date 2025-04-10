@@ -32,6 +32,7 @@
     "@supabase/supabase-js": "^2.49.1",
     "@tabler/icons-react": "^3.27.1",
     "ably": "^2.6.3",
+    "camelcase-keys": "^9.1.3",
     "ci": "^2.3.0",
     "clsx": "^2.1.1",
     "emoji-picker-react": "^4.12.2",

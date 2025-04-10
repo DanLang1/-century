@@ -55,7 +55,7 @@ export type Database = {
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'enriched_messages';
-            referencedColumns: ['sender_id'];
+            referencedColumns: ['senderid'];
           },
           {
             foreignKeyName: 'messages_user_id_fkey';
@@ -73,7 +73,7 @@ export type Database = {
           is_anon: boolean;
           updated_at: string | null;
           username: string;
-          website: string | null;
+          website: string;
         };
         Insert: {
           avatar?: string | null;
@@ -119,14 +119,14 @@ export type Database = {
           {
             foreignKeyName: 'reactions_message_id_fkey';
             columns: ['message_id'];
-            isOneToOne: true;
+            isOneToOne: false;
             referencedRelation: 'enriched_messages';
             referencedColumns: ['id'];
           },
           {
             foreignKeyName: 'reactions_message_id_fkey';
             columns: ['message_id'];
-            isOneToOne: true;
+            isOneToOne: false;
             referencedRelation: 'messages';
             referencedColumns: ['id'];
           },
@@ -135,7 +135,7 @@ export type Database = {
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'enriched_messages';
-            referencedColumns: ['sender_id'];
+            referencedColumns: ['senderid'];
           },
           {
             foreignKeyName: 'reactions_user_id_fkey';
@@ -151,7 +151,7 @@ export type Database = {
       enriched_messages: {
         Row: {
           id: string;
-          message: string;
+          message: string | null;
           reactions?: ReactionDB[];
           sender_avatar: string;
           sender_id: string;

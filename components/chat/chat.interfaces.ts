@@ -18,9 +18,9 @@ export interface Message {
   id: string;
   timestamp: string;
   message: string | null;
-  sender_username: string;
-  sender_avatar: string;
-  sender_id: string;
+  senderUsername: string;
+  senderAvatar: string;
+  senderId: string;
   reactions?: ReactionDB[];
 }
 export interface ReactionDB {
@@ -28,6 +28,7 @@ export interface ReactionDB {
   emoji: string;
   username: string;
   xatType?: boolean;
+  reactionId?: number;
 }
 
 export interface Reaction {
