@@ -61,23 +61,25 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
 
     return (
       <Text size="sm" style={{ fontStyle: hasAdminIcon ? 'italic' : 'normal' }}>
-        {messageToParse
-          .split(/(\(.*?\))/g)
-          .map((part, index) =>
-            emojiMap[part] ? (
-              <Image
-                unoptimized
-                key={index}
-                src={emojiMap[part].src}
-                alt={part}
-                width={emojiMap[part]?.width ?? 25}
-                height={emojiMap[part]?.height ?? 25}
-                style={{ marginLeft: '2px', marginBottom: '-3px' }}
-              />
-            ) : (
-              <Interweave newWindow key={index} content={part} matchers={[new UrlMatcher('url')]} />
-            )
-          )}
+        {messageToParse.split(/(\(.*?\))/g).map((part, index) =>
+          emojiMap[part] ? (
+            <Image
+              unoptimized
+              key={index}
+              src={emojiMap[part].src}
+              alt={part}
+              width={emojiMap[part]?.width ?? 25}
+              height={emojiMap[part]?.height ?? 25}
+              style={{
+                marginLeft: '3px',
+                marginRight: '3px',
+                marginBottom: emojiMap[part]?.height ? '-3px' : '-8px',
+              }}
+            />
+          ) : (
+            <Interweave newWindow key={index} content={part} matchers={[new UrlMatcher('url')]} />
+          )
+        )}
       </Text>
     );
   };
