@@ -74,6 +74,7 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
                 marginLeft: '3px',
                 marginRight: '3px',
                 marginBottom: emojiMap[part]?.height ? '-3px' : '-8px',
+                marginTop: emojiMap[part]?.height ? '0px' : '5px',
               }}
             />
           ) : (
