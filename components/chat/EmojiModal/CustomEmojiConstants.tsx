@@ -32,7 +32,7 @@ export const customEmojis = [
   { names: ['chew'], imgUrl: '/emotes/a_(chew)_40.webp', id: '(chew)' },
   { names: ['chkl'], imgUrl: '/emotes/a_(chkl)_40.webp', id: '(chkl)' },
   { names: ['cloud'], imgUrl: '/emotes/a_(cloud)_40.webp', id: '(cloud)' },
-  { names: ['confounded'], imgUrl: '/emotes/a_(confounded)_40.webp', id: '(counfounded)' },
+  { names: ['confounded'], imgUrl: '/emotes/a_(confounded)_40.webp', id: '(confounded)' },
   { names: ['confused'], imgUrl: '/emotes/a_(confused)_40.webp', id: '(confused)' },
   { names: ['cool'], imgUrl: '/emotes/a_(cool)_40.webp', id: '(cool)' },
   { names: ['crazy'], imgUrl: '/emotes/a_(crazy)_40.webp', id: '(crazy)' },
