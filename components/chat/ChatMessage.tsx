@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useChannel } from 'ably/react';
 import camelcaseKeys from 'camelcase-keys';
+import { Interweave } from 'interweave';
+import { UrlMatcher } from 'interweave-autolink';
 import {
   Avatar,
   Badge,
@@ -50,28 +52,34 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
     return match ? `(${match[1]})` : null;
   };
 
-  const formatMessage = (message: string | null) => {
-    if (message === null) {
+  const formattedMessage = (messageToParse: string | null) => {
+    if (messageToParse === null) {
       return null;
     }
 
-    return message
-      .split(/(\(.*?\))/g)
-      .map((part, index) =>
-        emojiMap[part] ? (
-          <Image
-            unoptimized
-            key={index}
-            src={emojiMap[part]}
-            alt={part}
-            width={25}
-            height={25}
-            style={{ marginLeft: '2px', marginBottom: '-3px' }}
-          />
-        ) : (
-          part
-        )
-      );
+    const hasAdminIcon = messageToParse.includes('(admin-icon)'); // Check if admin icon exists
+
+    return (
+      <Text size="sm" style={{ fontStyle: hasAdminIcon ? 'italic' : 'normal' }}>
+        {messageToParse
+          .split(/(\(.*?\))/g)
+          .map((part, index) =>
+            emojiMap[part] ? (
+              <Image
+                unoptimized
+                key={index}
+                src={emojiMap[part].src}
+                alt={part}
+                width={emojiMap[part]?.width ?? 25}
+                height={emojiMap[part]?.height ?? 25}
+                style={{ marginLeft: '2px', marginBottom: '-3px' }}
+              />
+            ) : (
+              <Interweave newWindow key={index} content={part} matchers={[new UrlMatcher('url')]} />
+            )
+          )}
+      </Text>
+    );
   };
 
   const handleEmojiReact = async (emoji: string, xatType: boolean) => {
@@ -160,7 +168,7 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
 
         <Paper p="xs" pr="lg" radius="lg" className={classes.paper}>
           <EmojiReaction message={message} currUser={user} />
-          <Text size="sm">{formatMessage(message.message)}</Text>
+          {formattedMessage(message.message)}
         </Paper>
 
         <Group gap="2px">

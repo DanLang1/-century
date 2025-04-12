@@ -190,10 +190,17 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
       return;
     }
 
+    let messageToSend = values.message;
+
+    if (values.message.trim() === '!roll') {
+      const roll = Math.floor(Math.random() * 100) + 1;
+      messageToSend = `(admin-icon) ${user.username} rolled ${roll}`;
+    }
+
     const tempMessage: Message = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
-      message: values.message,
+      message: messageToSend,
       senderUsername: user.username,
       senderAvatar: user.avatar,
       senderId: user.id,
@@ -202,7 +209,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
     channel.publish({ name: MessageType.ChatMessage, data: tempMessage });
     form.reset();
 
-    const { error } = await sendMessage(user.id, values.message, tempMessage.id);
+    const { error } = await sendMessage(user.id, messageToSend, tempMessage.id);
     if (error) {
       notifications.show({
         title: 'You Win!',
