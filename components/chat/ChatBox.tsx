@@ -53,6 +53,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
   const [pendingMessage, setPendingMessage] = useState<string>('');
   const [usersTyping, setUsersTyping] = useState<UserInfo[]>([]);
   const [lastSent, setLastSent] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
 
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
@@ -254,9 +255,11 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
     let userInfoFromDb: UserInfo = user;
 
     if (user.id !== '') {
+      setLoading(true);
       const result = await updateUser(formData, user.id);
       if (result.errors) {
         userForm.setErrors(result.errors);
+        setLoading(false);
         return;
       }
       userInfoFromDb = {
@@ -264,11 +267,14 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
         avatar: result.data.avatar,
         id: result.data.id,
       };
+      setLoading(false);
     } else {
+      setLoading(true);
       const result = await createAnonymousUser(formData);
       if (result.errors) {
         userForm.setErrors(result.errors);
         setPendingMessage('');
+        setLoading(false);
         return;
       }
       userInfoFromDb = result?.user ?? userInfoFromDb;
@@ -284,6 +290,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
         channel.publish({ name: MessageType.ChatMessage, data: tempMessage });
         const { error } = await sendMessage(userInfoFromDb.id, pendingMessage, tempMessage.id);
         if (error) {
+          setLoading(false);
           notifications.show({
             title: 'You Win!',
             color: 'red',
@@ -293,6 +300,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
       }
       const messages = await getMessages();
       setMessages(messages);
+      setLoading(false);
     }
 
     updateStatus(userInfoFromDb);
@@ -317,6 +325,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
           toggleModal={toggleModal}
           form={userForm}
           user={user}
+          loading={loading}
         />
       </form>
 

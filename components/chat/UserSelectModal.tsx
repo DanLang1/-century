@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { IconUser } from '@tabler/icons-react';
-import { Button, Modal, Stack, Text, TextInput } from '@mantine/core';
+import { Button, LoadingOverlay, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { AvatarSelector } from './AvatarSelector';
 import { UserForm, UserInfo } from './chat.interfaces';
@@ -10,9 +10,16 @@ export interface UserSelectModalProps {
   toggleModal: () => void;
   form: UseFormReturnType<UserForm>;
   user: UserInfo;
+  loading: boolean;
 }
 
-export function UserSelectModal({ modalOpened, toggleModal, form, user }: UserSelectModalProps) {
+export function UserSelectModal({
+  modalOpened,
+  toggleModal,
+  form,
+  user,
+  loading,
+}: UserSelectModalProps) {
   const router = useRouter();
   const navigateToAuthForm = () => {
     router.push('/login?type=register');
@@ -30,7 +37,8 @@ export function UserSelectModal({ modalOpened, toggleModal, form, user }: UserSe
       title="Select User Icon and Username"
       zIndex={202}
     >
-      <Stack>
+      <Stack pos="relative">
+        <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: 'sm', blur: 2 }} />
         <AvatarSelector form={form} />
         {form.errors.avatar && (
           <Text c="var(--mantine-color-error)" size="xs">
