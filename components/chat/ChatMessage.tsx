@@ -45,6 +45,11 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
     {}
   );
 
+  const extractParentheses = (text: string): string | null => {
+    const match = text.match(/\(([^)]+)\)/);
+    return match ? `(${match[1]})` : null;
+  };
+
   const formatMessage = (message: string | null) => {
     if (message === null) {
       return null;
@@ -141,7 +146,7 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
           <Avatar size="md" src={matchingUser?.avatar ?? message.senderAvatar} mt="4" />
         </Indicator>
       </Stack>
-      <Stack gap="4">
+      <Stack gap="4px">
         <Group gap="xs">
           <Group align="baseline" gap="xs">
             <Text size="md" fw={500}>
@@ -160,15 +165,36 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
 
         <Group gap="2px">
           {Object.entries(reactionCounts)?.map(([emoji, { xatType, usernames }], index) => (
-            <Tooltip color="grey" label={usernames.join(', ')} key={`${index}-${emoji}`}>
-              <UnstyledButton onClick={() => handleEmojiReact(emoji, xatType)}>
+            <Tooltip
+              color="grey"
+              label={`${usernames.join(', ')} reacted with ${extractParentheses(emoji) ?? emoji}`}
+              key={`${index}-${emoji}`}
+            >
+              <UnstyledButton
+                onClick={() => handleEmojiReact(emoji, xatType)}
+                className={classes.fitContent}
+              >
                 <Badge
+                  my="5px"
                   key={`${emoji}-${index}`}
                   size="lg"
                   classNames={{ label: classes.label, root: classes.root }}
                   leftSection={
                     xatType ? (
-                      <Image src={emoji} width={15} height={15} alt={emoji} unoptimized />
+                      <Image
+                        src={emoji}
+                        width={15}
+                        height={15}
+                        alt={emoji}
+                        unoptimized
+                        style={{
+                          maxHeight: 15,
+                          minHeight: 15,
+                          maxWidth: 15,
+                          minWidth: 15,
+                          position: 'relative',
+                        }}
+                      />
                     ) : (
                       emoji
                     )

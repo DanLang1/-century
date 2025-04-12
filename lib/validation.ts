@@ -36,5 +36,5 @@ export const passwordSchema = z.object({
 });
 
 export const chatMessageSchema = z.object({
-  message: z.string().max(500, { message: 'Azx please break this up into 2 messages' }),
+  message: z.string().max(400, { message: 'Azx please break this up into 2 messages' }),
 });

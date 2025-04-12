@@ -10,6 +10,14 @@
     1px solid var(--mantine-color-gray-8)
   );
   cursor: pointer;
+  transition: background-color 0.2s ease;
+  transform: translateZ(0);
+  /* backface-visibility: hidden;
+  will-change: transform; */
+}
+
+.root:hover {
+  --badge-bg: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-7));
 }
 
 .paper {
@@ -30,4 +38,9 @@
 /* Show icon on hover */
 .paper:hover .actionIcon {
   opacity: 1;
+}
+
+.fitContent {
+  height: fit-content;
+  width: fit-content;
 }

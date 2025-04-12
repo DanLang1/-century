@@ -1,0 +1,9 @@
+.icon {
+  color: grey;
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.icon:hover {
+  color: var(--mantine-color-blue-dark); /* or any color you want on hover */
+}

@@ -52,6 +52,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>(existingMessages);
   const [pendingMessage, setPendingMessage] = useState<string>('');
   const [usersTyping, setUsersTyping] = useState<UserInfo[]>([]);
+  const [lastSent, setLastSent] = useState<number>(0);
 
   const [opened, { toggle }] = useDisclosure();
   const [modalOpened, { toggle: toggleModal }] = useDisclosure(false);
@@ -128,6 +129,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
   const form = useForm<Chat>({
     mode: 'controlled',
     initialValues: { message: '' },
+    validateInputOnChange: true,
     validate: zodResolver(chatMessageSchema),
   });
 
@@ -177,17 +179,17 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
     return scrollHeight - (scrollTop + clientHeight) < 200;
   };
 
-  const handleSubmit = async (values: Chat) => {
+  const throttledSubmit = useThrottledCallback(async (values: Chat) => {
     if (!user) {
       return;
     }
+
     if (user?.username === 'xatRando') {
       toggleModal();
       setPendingMessage(values.message);
       return;
     }
 
-    // pub message immediately, then save
     const tempMessage: Message = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
@@ -199,6 +201,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
 
     channel.publish({ name: MessageType.ChatMessage, data: tempMessage });
     form.reset();
+
     const { error } = await sendMessage(user.id, values.message, tempMessage.id);
     if (error) {
       notifications.show({
@@ -207,6 +210,25 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
         message: 'You broke the database, congratulations!',
       });
     }
+
+    setLastSent(Date.now());
+  }, 1000);
+
+  const handleSubmit = (values: Chat) => {
+    if (!values.message) {
+      return;
+    }
+    const now = Date.now();
+    if (now - lastSent < 1000) {
+      notifications.show({
+        title: 'Pls Slow Down!',
+        message: 'Pls no spammer 🐧',
+        color: 'yellow',
+        autoClose: 3000,
+      });
+    }
+
+    throttledSubmit(values);
   };
 
   const send = () => {
@@ -277,7 +299,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
     if (user.id) {
       channel.publish(MessageType.TypingEvent, user);
     }
-  }, 3000);
+  }, 2000);
 
   // TODO: More elegant way to handle the VH for chat area. Very hacky rn
   return (
@@ -315,6 +337,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
                     ? `calc(100vh - var(--app-shell-header-height) - var(--app-shell-padding) - 15em)`
                     : `calc(100vh - var(--app-shell-header-height) - 10em)`,
                   minHeight: '200px', // Ensures it never gets too small
+                  willChange: 'transform', // prevent animated gifs jitter
                 }}
                 type="always"
                 viewportRef={viewport}
@@ -339,6 +362,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
                 ref={inputRef}
                 leftSection={<EmojiModal form={form} inputRef={inputRef} />}
                 rightSection={send()}
+                error={form.errors.message}
               />
             </Stack>
             <ActiveUserDisplayMobile

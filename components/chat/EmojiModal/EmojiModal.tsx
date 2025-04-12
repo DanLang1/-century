@@ -5,6 +5,7 @@ import { ActionIcon, Popover } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { Chat } from '../chat.interfaces';
 import { customEmojis, emojiCategories } from './CustomEmojiConstants';
+import classes from './EmojiModal.module.css';
 
 interface EmojiModalProps {
   form: UseFormReturnType<Chat>;
@@ -32,7 +33,7 @@ export function EmojiModal({ form, inputRef }: EmojiModalProps) {
     >
       <Popover.Target>
         <ActionIcon variant="transparent">
-          <IconMoodSmile />
+          <IconMoodSmile className={classes.icon} />
         </ActionIcon>
       </Popover.Target>
       <Popover.Dropdown>
