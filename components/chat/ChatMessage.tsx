@@ -169,10 +169,12 @@ export function ChatMessage({ message, users, user }: ChatMessageProps) {
           </Group>
         </Group>
 
-        <Paper p="xs" pr="lg" radius="lg" className={classes.paper}>
-          <EmojiReaction message={message} currUser={user} />
-          {formattedMessage(message.message)}
-        </Paper>
+        <EmojiReaction message={message} currUser={user}>
+          <Paper p="xs" pr="lg" radius="lg" className={classes.paper}>
+            {/* <EmojiReaction message={message} currUser={user} /> */}
+            {formattedMessage(message.message)}
+          </Paper>
+        </EmojiReaction>
 
         <Group gap="2px">
           {Object.entries(reactionCounts)?.map(([emoji, { xatType, usernames }], index) => (

@@ -1,24 +1,22 @@
-import { useState } from 'react';
-import { IconMoodSmile } from '@tabler/icons-react';
+import React, { useState } from 'react';
 import { useChannel } from 'ably/react';
 import camelcaseKeys from 'camelcase-keys';
 import EmojiPicker, { EmojiClickData, EmojiStyle, Theme } from 'emoji-picker-react';
-import { ActionIcon, Popover } from '@mantine/core';
+import { Popover } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { addReaction, removeReaction } from '@/app/(main)/actions';
 import { Message, ReactionDB, UserInfo } from '../chat.interfaces';
 import { MessageType } from '../ChatConstants';
 import { customEmojis, emojiCategories } from './CustomEmojiConstants';
-import classes from '../ChatMessage.module.css';
 
 interface EmojiReactionProps {
   message: Message;
   currUser: UserInfo;
+  children: React.ReactNode;
 }
 
-export function EmojiReaction({ message, currUser }: EmojiReactionProps) {
+export function EmojiReaction({ message, currUser, children }: EmojiReactionProps) {
   const { channel } = useChannel('chat-demo');
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const onEmojiClick = async (emojiObject: EmojiClickData) => {
@@ -82,27 +80,15 @@ export function EmojiReaction({ message, currUser }: EmojiReactionProps) {
 
     channel.publish({ name: MessageType.ReactionAdded, data: messageWithEmoji });
     setLoading(false);
-
-    setOpen(false);
   };
 
   return (
     <Popover
-      opened={open}
       position="bottom"
       styles={{ dropdown: { padding: 0, background: 'transparent', border: 'none' } }}
-      onChange={setOpen}
+      trapFocus
     >
-      <Popover.Target>
-        <ActionIcon
-          variant="transparent"
-          className={classes.actionIcon}
-          size="17"
-          onClick={() => setOpen((o) => !o)}
-        >
-          <IconMoodSmile color="grey" />
-        </ActionIcon>
-      </Popover.Target>
+      <Popover.Target>{children}</Popover.Target>
       <Popover.Dropdown>
         <EmojiPicker
           categories={emojiCategories}

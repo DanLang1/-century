@@ -21,10 +21,10 @@
     "storybook:build": "storybook build"
   },
   "dependencies": {
-    "@mantine/core": "7.17.2",
-    "@mantine/form": "^7.17.2",
-    "@mantine/hooks": "7.17.2",
-    "@mantine/notifications": "^7.17.2",
+    "@mantine/core": "8.3.8",
+    "@mantine/form": "^8.3.8",
+    "@mantine/hooks": "8.3.8",
+    "@mantine/notifications": "^8.3.8",
     "@next/bundle-analyzer": "15.1.0",
     "@next/eslint-plugin-next": "^15.1.0",
     "@supabase/postgrest-js": "^1.19.2",
@@ -59,7 +59,7 @@
     "@types/eslint-plugin-jsx-a11y": "^6",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.8",
-    "@types/react": "19.0.0",
+    "@types/react": "19.2.0",
     "babel-loader": "^9.1.3",
     "eslint": "^9.17.0",
     "eslint-config-mantine": "^4.0.3",
@@ -84,6 +84,6 @@
   },
   "packageManager": "pnpm@10.6.1",
   "overrides": {
-    "@types/react": "19.0.0"
+    "@types/react": "19.2.0"
   }
 }

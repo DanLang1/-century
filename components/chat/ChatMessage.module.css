@@ -24,6 +24,48 @@
   position: relative;
   height: fit-content;
   width: fit-content;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+.paper::after {
+  content: '';
+  position: absolute;
+  inset: -2px; /* thickness of the border */
+  border-radius: inherit;
+
+  /* shimmer gradient */
+  background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet, red);
+  background-size: 300% 100%;
+  animation: rainbowShimmer 5s linear infinite;
+
+  /* masking to create only the border outline */
+  padding: 2px;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+/* turn on border when hovered */
+.paper:hover::after {
+  opacity: 1;
+}
+
+@keyframes rainbowShimmer {
+  0% {
+    background-position: 0% 0;
+  }
+  100% {
+    background-position: 300% 0;
+  }
 }
 
 /* Hide icon by default */
