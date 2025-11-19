@@ -84,9 +84,9 @@ export async function signup(formData: FormData) {
 
   const { error } = await supabase.auth.signUp(request);
 
-  // todo: better error handling
   if (error) {
-    redirect('/error');
+    console.error(error);
+    return { error };
   }
 
   redirect('/login/waitConfirm');

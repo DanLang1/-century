@@ -15,6 +15,7 @@ import {
 } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { upperFirst, useToggle } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications';
 import { login, signup } from '@/app/login/actions';
 import { loginSchema, signupSchema } from '@/lib/validation';
 import { AvatarSelector } from './chat/AvatarSelector';
@@ -45,8 +46,14 @@ export function AuthenticationForm(props: PaperProps) {
       formData.append('username', values.username);
       formData.append('terms', values.terms.toString());
       formData.append('avatar', values.avatar);
-      const { errors } = await signup(formData);
-      form.setErrors(errors);
+      const { error } = await signup(formData);
+      notifications.show({
+        color: 'red',
+        title: 'Something went wrong :(',
+        message: error?.message,
+        position: 'top-center',
+        autoClose: false,
+      });
     } else if (type === 'login') {
       const { errors } = await login(formData);
       form.setErrors(errors);

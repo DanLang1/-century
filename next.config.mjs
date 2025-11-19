@@ -9,4 +9,8 @@ export default withBundleAnalyzer({
   experimental: {
     optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
   },
+  images: {
+    loader: 'custom',
+    loaderFile: './supabase-image-loader.js',
+  },
 });
