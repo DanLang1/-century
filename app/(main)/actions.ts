@@ -47,14 +47,13 @@ export async function updateUser(formData: FormData, id?: string) {
     };
   }
 
-  // 3. Call the Supabase client and get the response
   const { data, error } = await supabase
     .from('profiles')
     .update(body)
     .eq('id', id)
     .select('*')
     .single();
-  // 4. If there was an error, throw it
+
   if (error) {
     throw error;
   }
@@ -94,7 +93,6 @@ export async function createAnonymousUser(formData: FormData) {
     };
   }
 
-  // 3. Call the Supabase client and get the response
   const { data, error } = await supabase.auth.signInAnonymously({
     options: {
       data: {

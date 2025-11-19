@@ -5,5 +5,5 @@
 }
 
 .icon:hover {
-  color: var(--mantine-color-blue-dark); /* or any color you want on hover */
+  color: var(--mantine-color-blue-dark);
 }
