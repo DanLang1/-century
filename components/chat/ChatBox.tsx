@@ -325,7 +325,7 @@ export function ChatBox({ user, existingMessages }: ChatProps) {
           toggleModal={toggleModal}
           form={userForm}
           user={user}
-          loading={loading}
+          loading={loading} // todo: use form.submitting
         />
       </form>
 

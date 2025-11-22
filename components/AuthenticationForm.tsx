@@ -6,6 +6,7 @@ import {
   Button,
   Checkbox,
   Group,
+  LoadingOverlay,
   Paper,
   PaperProps,
   PasswordInput,
@@ -68,11 +69,7 @@ export function AuthenticationForm(props: PaperProps) {
           : 'Login to the team of the Century!'}
       </Text>
 
-      <form
-        onSubmit={form.onSubmit((values) => {
-          handleSubmit(values);
-        })}
-      >
+      <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           {type === 'register' && (
             <TextInput
@@ -134,7 +131,7 @@ export function AuthenticationForm(props: PaperProps) {
               ? 'Already have an account? Login'
               : "Don't have an account? Register"}
           </Anchor>
-          <Button type="submit" radius="xl">
+          <Button type="submit" radius="xl" loading={form.submitting}>
             {upperFirst(type)}
           </Button>
         </Group>
